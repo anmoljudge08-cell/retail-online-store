@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero">
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <span class="eyebrow">Fresh arrivals every day</span>
+      <h1>Upgrade your lifestyle with everyday essentials.</h1>
+      <p>
+        Discover curated products for work, travel, home, and wellness. Shop smart with a checkout built for demo use.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#products">Shop now</a>
+        <a class="btn btn-secondary" href="{{ url_for('catalog') }}">Browse catalog</a>
+      </div>
+      <ul class="trust-points">
+        <li>Free demo delivery</li>
+        <li>Secure checkout flow</li>
+        <li>Customer-first support</li>
+      </ul>
+    </div>
+
+    <div class="hero-card">
+      <div class="mini-card">
+        <span class="mini-label">Trending now</span>
+        <h3>Smart Essentials Bundle</h3>
+        <div class="mini-price-row">
+          <strong>₹4,399</strong>
+          <span>Save 18%</span>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">🛍️</div>
+    </div>
+  </div>
+</section>
+
+<section class="catalog-header" id="products">
+  <div class="container catalog-header-row">
+    <div>
+      <span class="eyebrow">Our collection</span>
+      <h2>Popular products</h2>
+    </div>
+    <form class="search-form" method="get" action="{{ url_for('catalog') }}">
+      <input type="search" name="q" value="{{ query }}" placeholder="Search products, categories, or descriptions" aria-label="Search products" />
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+  </div>
+</section>
+
+<section class="products-section">
+  <div class="container product-grid">
+    {% for product in products %}
+      <article class="product-card">
+        <div class="product-art art-{{ loop.index % 3 }}">{{ product.emoji }}</div>
+        <div class="product-body">
+          <p class="product-category">{{ product.category }}</p>
+          <h3>{{ product.name }}</h3>
+          <p class="product-description">{{ product.description }}</p>
+          <div class="product-footer">
+            <strong>{{ product.price|money }}</strong>
+            <form method="post" action="{{ url_for('add_to_cart', product_id=product.id) }}">
+              <input type="hidden" name="quantity" value="1" />
+              <button type="submit" class="btn btn-primary btn-small">Add to cart</button>
+            </form>
+          </div>
+        </div>
+      </article>
+    {% else %}
+      <div class="empty-state">
+        <h3>No products matched your search.</h3>
+        <p>Try another keyword or visit the full catalog.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="why-us">
+  <div class="container feature-grid">
+    <article>
+      <span>⚡</span>
+      <h3>Fast delivery</h3>
+      <p>Quick shipping for selected products and demo-ready order processing.</p>
+    </article>
+    <article>
+      <span>💬</span>
+      <h3>Friendly support</h3>
+      <p>Helpful assistance for account setup, cart updates, and checkout questions.</p>
+    </article>
+    <article>
+      <span>🔒</span>
+      <h3>Secure demo flow</h3>
+      <p>Account login and order details are handled in a safe demo environment.</p>
+    </article>
+  </div>
+</section>
+{% endblock %}

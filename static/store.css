@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="page-section">
+  <div class="container checkout-shell">
+    <div class="section-heading inline-heading">
+      <div>
+        <span class="eyebrow">Secure demo</span>
+        <h2>Checkout</h2>
+      </div>
+      <a class="btn btn-secondary" href="{{ url_for('cart') }}">Back to cart</a>
+    </div>
+
+    <div class="checkout-layout">
+      <div class="checkout-panel">
+        <h3>Delivery details</h3>
+        <div class="delivery-card">
+          <p><strong>Name:</strong> {{ current_user.name }}</p>
+          <p><strong>Email:</strong> {{ current_user.email }}</p>
+          <p><strong>Delivery:</strong> Demo shipping to your nearest pickup center</p>
+          <p><strong>Payment:</strong> Demo checkout only — no real payment is processed</p>
+        </div>
+
+        {% if success %}
+          <div class="success-banner">
+            <h3>Order confirmed</h3>
+            <p>Order number: <strong>{{ order_number }}</strong></p>
+            <p>Your order has been recorded in the demo system. No payment was processed.</p>
+          </div>
+        {% else %}
+          <form class="checkout-form" method="post" action="{{ url_for('checkout') }}">
+            <label>
+              Full name
+              <input type="text" value="{{ current_user.name }}" readonly />
+            </label>
+            <label>
+              Shipping address
+              <textarea rows="4" placeholder="123 Example Street, City, State">Demo address for checkout review</textarea>
+            </label>
+            <button type="submit" class="btn btn-primary btn-full">Confirm demo checkout</button>
+          </form>
+        {% endif %}
+      </div>
+
+      <aside class="cart-summary">
+        <h3>Order summary</h3>
+        {% for item in cart_items %}
+          <div class="summary-item-row">
+            <span>{{ item.name }} × {{ item.quantity }}</span>
+            <strong>{{ item.line_total|money }}</strong>
+          </div>
+        {% endfor %}
+        <div class="summary-row total-row">
+          <span>Total</span>
+          <strong>{{ subtotal|money }}</strong>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}
