@@ -327,6 +327,38 @@ textarea {
   min-width: 0;
 }
 
+.catalog-filters {
+  padding: 8px 0 0;
+}
+
+.category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 0 16px;
+}
+
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(23,32,51,0.06);
+  color: var(--muted);
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.category-pill.active,
+.category-pill:hover {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 10px 20px rgba(83,84,214,0.2);
+}
+
 .products-section {
   padding: 18px 0 30px;
 }
