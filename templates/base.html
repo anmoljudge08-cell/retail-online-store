@@ -1,22 +1,25 @@
 # Retail Online Store
 
-A polished retail storefront built with Python and Flask. The project includes a professional homepage, searchable product catalog, shopping cart, user login and registration, and a demo checkout flow. It intentionally does not process real payments.
+A polished retail storefront built with Python and Flask. The project includes a professional homepage, searchable product catalog, product categories, shopping cart, account registration/login, and a demo checkout flow. No real payment processing is connected.
 
 ## Features
 
 - Professional storefront landing page
-- Searchable product catalog
+- Searchable catalog and category filtering
 - Shopping cart with quantity updates and total pricing
-- User registration and login using secure password hashing
-- Demo checkout with order persistence in SQLite
-- Fully responsive design for mobile and desktop
+- User registration and login with secure password hashing
+- Demo checkout that records an order without processing payment
+- Responsive design for desktop and mobile
+- Legacy demo preserved at `/legacy`
 
 ## Tech stack
 
 - Python 3
 - Flask
 - SQLite
-- HTML, CSS, and JavaScript
+- HTML
+- CSS
+- JavaScript
 
 ## Run locally
 
@@ -33,12 +36,23 @@ Then open:
 http://127.0.0.1:5000
 ```
 
+## Routes
+
+- `/` — main storefront homepage
+- `/catalog` — catalog with search and category filtering
+- `/cart` — cart summary and quantity edits
+- `/login` — user login
+- `/register` — user registration
+- `/checkout` — demo checkout flow
+- `/legacy` — original static demo page
+
 ## Notes
 
-- The app stores demo order data in `store.db`.
-- The legacy single-page demo remains available at `/legacy`.
-- No real payment provider is connected.
+- User data and demo order records are stored in `store.db`.
+- The project is intentionally a demo storefront and does not connect to a payment provider.
+- The `main` branch remains untouched; feature work is kept on `feature/storefront-mvp`.
 
 ## Developer
 
 Anmol Preet Singh
+

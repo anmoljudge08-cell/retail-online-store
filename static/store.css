@@ -1,107 +1,61 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="hero">
-  <div class="container hero-inner">
-    <div class="hero-copy">
-      <span class="eyebrow">Fresh arrivals every day</span>
-      <h1>Upgrade your lifestyle with everyday essentials.</h1>
-      <p>
-        Discover curated products for work, travel, home, and wellness. Shop smart with a checkout built for demo use.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#products">Shop now</a>
-        <a class="btn btn-secondary" href="{{ url_for('catalog') }}">Browse catalog</a>
+<section class="page-section">
+  <div class="container checkout-shell">
+    <div class="section-heading inline-heading">
+      <div>
+        <span class="eyebrow">Secure demo</span>
+        <h2>Checkout</h2>
       </div>
-      <ul class="trust-points">
-        <li>Free demo delivery</li>
-        <li>Secure checkout flow</li>
-        <li>Customer-first support</li>
-      </ul>
+      <a class="btn btn-secondary" href="{{ url_for('cart') }}">Back to cart</a>
     </div>
 
-    <div class="hero-card">
-      <div class="mini-card">
-        <span class="mini-label">Trending now</span>
-        <h3>Smart Essentials Bundle</h3>
-        <div class="mini-price-row">
-          <strong>₹4,399</strong>
-          <span>Save 18%</span>
+    <div class="checkout-layout">
+      <div class="checkout-panel">
+        <h3>Delivery details</h3>
+        <div class="delivery-card">
+          <p><strong>Name:</strong> {{ current_user.name }}</p>
+          <p><strong>Email:</strong> {{ current_user.email }}</p>
+          <p><strong>Delivery:</strong> Demo shipping to your nearest pickup center</p>
+          <p><strong>Payment:</strong> Demo checkout only — no real payment is processed</p>
         </div>
-      </div>
-      <div class="hero-visual" aria-hidden="true">🛍️</div>
-    </div>
-  </div>
-</section>
 
-<section class="catalog-header" id="products">
-  <div class="container catalog-header-row">
-    <div>
-      <span class="eyebrow">Our collection</span>
-      <h2>Popular products</h2>
-    </div>
-    <form class="search-form" method="get" action="{{ url_for('catalog') }}">
-      <input type="search" name="q" value="{{ query }}" placeholder="Search products, categories, or descriptions" aria-label="Search products" />
-      <button type="submit" class="btn btn-primary">Search</button>
-    </form>
-  </div>
-</section>
-
-<section class="catalog-filters">
-  <div class="container">
-    <div class="category-bar" aria-label="Product categories">
-      <a class="category-pill {% if not selected_category %}active{% endif %}" href="{{ url_for('catalog', q=query) }}">All</a>
-      {% for category in categories %}
-        <a class="category-pill {% if selected_category == category %}active{% endif %}" href="{{ url_for('catalog', q=query, category=category) }}">{{ category }}</a>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<section class="products-section">
-  <div class="container product-grid">
-    {% for product in products %}
-      <article class="product-card">
-        <div class="product-art art-{{ loop.index % 3 }}">{{ product.emoji }}</div>
-        <div class="product-body">
-          <p class="product-category">{{ product.category }}</p>
-          <h3>{{ product.name }}</h3>
-          <p class="product-description">{{ product.description }}</p>
-          <div class="product-footer">
-            <strong>{{ product.price|money }}</strong>
-            <form method="post" action="{{ url_for('add_to_cart', product_id=product.id) }}">
-              <input type="hidden" name="quantity" value="1" />
-              <button type="submit" class="btn btn-primary btn-small">Add to cart</button>
-            </form>
+        {% if success %}
+          <div class="success-banner">
+            <h3>Order confirmed</h3>
+            <p>Order number: <strong>{{ order_number }}</strong></p>
+            <p>Your order has been recorded in the demo system. No payment was processed.</p>
           </div>
-        </div>
-      </article>
-    {% else %}
-      <div class="empty-state">
-        <h3>No products matched your search.</h3>
-        <p>Try another keyword or visit the full catalog.</p>
+        {% else %}
+          <form class="checkout-form" method="post" action="{{ url_for('checkout') }}">
+            <label>
+              Full name
+              <input type="text" value="{{ current_user.name }}" readonly />
+            </label>
+            <label>
+              Shipping address
+              <textarea rows="4" placeholder="123 Example Street, City, State">Demo address for checkout review</textarea>
+            </label>
+            <button type="submit" class="btn btn-primary btn-full">Confirm demo checkout</button>
+          </form>
+        {% endif %}
       </div>
-    {% endfor %}
-  </div>
-</section>
 
-<section class="why-us">
-  <div class="container feature-grid">
-    <article>
-      <span>⚡</span>
-      <h3>Fast delivery</h3>
-      <p>Quick shipping for selected products and demo-ready order processing.</p>
-    </article>
-    <article>
-      <span>💬</span>
-      <h3>Friendly support</h3>
-      <p>Helpful assistance for account setup, cart updates, and checkout questions.</p>
-    </article>
-    <article>
-      <span>🔒</span>
-      <h3>Secure demo flow</h3>
-      <p>Account login and order details are handled in a safe demo environment.</p>
-    </article>
+      <aside class="cart-summary">
+        <h3>Order summary</h3>
+        {% for item in cart_items %}
+          <div class="summary-item-row">
+            <span>{{ item.name }} × {{ item.quantity }}</span>
+            <strong>{{ item.line_total|money }}</strong>
+          </div>
+        {% endfor %}
+        <div class="summary-row total-row">
+          <span>Total</span>
+          <strong>{{ subtotal|money }}</strong>
+        </div>
+      </aside>
+    </div>
   </div>
 </section>
 {% endblock %}

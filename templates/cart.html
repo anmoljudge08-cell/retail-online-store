@@ -47,6 +47,17 @@
   </div>
 </section>
 
+<section class="catalog-filters">
+  <div class="container">
+    <div class="category-bar" aria-label="Product categories">
+      <a class="category-pill {% if not selected_category %}active{% endif %}" href="{{ url_for('catalog', q=query) }}">All</a>
+      {% for category in categories %}
+        <a class="category-pill {% if selected_category == category %}active{% endif %}" href="{{ url_for('catalog', q=query, category=category) }}">{{ category }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
 <section class="products-section">
   <div class="container product-grid">
     {% for product in products %}
