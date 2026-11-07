@@ -1,58 +1,55 @@
-# Retail Online Store
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Retail Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a class="brand" href="{{ url_for('home') }}">Retail<span>Store</span></a>
 
-A polished retail storefront built with Python and Flask. The project includes a professional homepage, searchable product catalog, product categories, shopping cart, account registration/login, and a demo checkout flow. No real payment processing is connected.
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="{{ url_for('catalog') }}">Catalog</a>
+          <a href="{{ url_for('cart') }}">Cart</a>
+          {% if current_user %}
+            <span class="welcome-name">Hi, {{ current_user.name.split()[0] }}</span>
+          {% endif %}
+        </nav>
 
-## Features
+        <div class="topbar-actions">
+          {% if current_user %}
+            <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+            <a class="btn btn-secondary" href="{{ url_for('login') }}">Login</a>
+          {% endif %}
+          <a class="cart-button" href="{{ url_for('cart') }}">
+            Cart <span id="cart-count">{{ cart_count }}</span>
+          </a>
+        </div>
+      </div>
+    </header>
 
-- Professional storefront landing page
-- Searchable catalog and category filtering
-- Shopping cart with quantity updates and total pricing
-- User registration and login with secure password hashing
-- Demo checkout that records an order without processing payment
-- Responsive design for desktop and mobile
-- Legacy demo preserved at `/legacy`
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-stack" aria-live="polite">
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
 
-## Tech stack
+    <main>
+      {% block content %}{% endblock %}
+    </main>
 
-- Python 3
-- Flask
-- SQLite
-- HTML
-- CSS
-- JavaScript
+    <footer class="site-footer">
+      © 2026 Retail Store · Student web development project
+    </footer>
 
-## Run locally
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python app.py
-```
-
-Then open:
-
-```text
-http://127.0.0.1:5000
-```
-
-## Routes
-
-- `/` — main storefront homepage
-- `/catalog` — catalog with search and category filtering
-- `/cart` — cart summary and quantity edits
-- `/login` — user login
-- `/register` — user registration
-- `/checkout` — demo checkout flow
-- `/legacy` — original static demo page
-
-## Notes
-
-- User data and demo order records are stored in `store.db`.
-- The project is intentionally a demo storefront and does not connect to a payment provider.
-- The `main` branch remains untouched; feature work is kept on `feature/storefront-mvp`.
-
-## Developer
-
-Anmol Preet Singh
-
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>

@@ -1,107 +1,74 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<section class="hero">
-  <div class="container hero-inner">
-    <div class="hero-copy">
-      <span class="eyebrow">Fresh arrivals every day</span>
-      <h1>Upgrade your lifestyle with everyday essentials.</h1>
-      <p>
-        Discover curated products for work, travel, home, and wellness. Shop smart with a checkout built for demo use.
-      </p>
-      <div class="hero-actions">
-        <a class="btn btn-primary" href="#products">Shop now</a>
-        <a class="btn btn-secondary" href="{{ url_for('catalog') }}">Browse catalog</a>
+<section class="page-section">
+  <div class="container cart-shell">
+    <div class="section-heading inline-heading">
+      <div>
+        <span class="eyebrow">Your cart</span>
+        <h2>Shopping cart summary</h2>
       </div>
-      <ul class="trust-points">
-        <li>Free demo delivery</li>
-        <li>Secure checkout flow</li>
-        <li>Customer-first support</li>
-      </ul>
+      <a class="btn btn-secondary" href="{{ url_for('catalog') }}">Continue shopping</a>
     </div>
 
-    <div class="hero-card">
-      <div class="mini-card">
-        <span class="mini-label">Trending now</span>
-        <h3>Smart Essentials Bundle</h3>
-        <div class="mini-price-row">
-          <strong>₹4,399</strong>
-          <span>Save 18%</span>
-        </div>
+    {% if not cart_items %}
+      <div class="empty-cart">
+        <h3>Your cart is empty.</h3>
+        <p>Add products from the catalog to see your quantities and total price here.</p>
+        <a class="btn btn-primary" href="{{ url_for('catalog') }}">Browse products</a>
       </div>
-      <div class="hero-visual" aria-hidden="true">🛍️</div>
-    </div>
-  </div>
-</section>
-
-<section class="catalog-header" id="products">
-  <div class="container catalog-header-row">
-    <div>
-      <span class="eyebrow">Our collection</span>
-      <h2>Popular products</h2>
-    </div>
-    <form class="search-form" method="get" action="{{ url_for('catalog') }}">
-      <input type="search" name="q" value="{{ query }}" placeholder="Search products, categories, or descriptions" aria-label="Search products" />
-      <button type="submit" class="btn btn-primary">Search</button>
-    </form>
-  </div>
-</section>
-
-<section class="catalog-filters">
-  <div class="container">
-    <div class="category-bar" aria-label="Product categories">
-      <a class="category-pill {% if not selected_category %}active{% endif %}" href="{{ url_for('catalog', q=query) }}">All</a>
-      {% for category in categories %}
-        <a class="category-pill {% if selected_category == category %}active{% endif %}" href="{{ url_for('catalog', q=query, category=category) }}">{{ category }}</a>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<section class="products-section">
-  <div class="container product-grid">
-    {% for product in products %}
-      <article class="product-card">
-        <div class="product-art art-{{ loop.index % 3 }}">{{ product.emoji }}</div>
-        <div class="product-body">
-          <p class="product-category">{{ product.category }}</p>
-          <h3>{{ product.name }}</h3>
-          <p class="product-description">{{ product.description }}</p>
-          <div class="product-footer">
-            <strong>{{ product.price|money }}</strong>
-            <form method="post" action="{{ url_for('add_to_cart', product_id=product.id) }}">
-              <input type="hidden" name="quantity" value="1" />
-              <button type="submit" class="btn btn-primary btn-small">Add to cart</button>
-            </form>
-          </div>
-        </div>
-      </article>
     {% else %}
-      <div class="empty-state">
-        <h3>No products matched your search.</h3>
-        <p>Try another keyword or visit the full catalog.</p>
-      </div>
-    {% endfor %}
-  </div>
-</section>
+      <div class="cart-layout">
+        <div class="cart-items">
+          {% for item in cart_items %}
+            <article class="cart-item">
+              <div class="cart-emoji">{{ item.emoji }}</div>
+              <div class="cart-copy">
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.price|money }} each</p>
+              </div>
 
-<section class="why-us">
-  <div class="container feature-grid">
-    <article>
-      <span>⚡</span>
-      <h3>Fast delivery</h3>
-      <p>Quick shipping for selected products and demo-ready order processing.</p>
-    </article>
-    <article>
-      <span>💬</span>
-      <h3>Friendly support</h3>
-      <p>Helpful assistance for account setup, cart updates, and checkout questions.</p>
-    </article>
-    <article>
-      <span>🔒</span>
-      <h3>Secure demo flow</h3>
-      <p>Account login and order details are handled in a safe demo environment.</p>
-    </article>
+              <form class="quantity-form" method="post" action="{{ url_for('cart') }}">
+                <input type="hidden" name="action" value="update" />
+                <input type="hidden" name="item_id" value="{{ item.id }}" />
+                <label>
+                  Quantity
+                  <input type="number" name="quantity" value="{{ item.quantity }}" min="1" />
+                </label>
+                <button type="submit" class="btn btn-secondary btn-small">Update</button>
+              </form>
+
+              <div class="line-total">
+                <strong>{{ item.line_total|money }}</strong>
+              </div>
+
+              <form class="remove-form" method="post" action="{{ url_for('cart') }}">
+                <input type="hidden" name="action" value="remove" />
+                <input type="hidden" name="item_id" value="{{ item.id }}" />
+                <button type="submit" class="btn btn-danger btn-small">Remove</button>
+              </form>
+            </article>
+          {% endfor %}
+        </div>
+
+        <aside class="cart-summary">
+          <h3>Order summary</h3>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <strong>{{ subtotal|money }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <strong>₹0.00</strong>
+          </div>
+          <div class="summary-row total-row">
+            <span>Total</span>
+            <strong>{{ subtotal|money }}</strong>
+          </div>
+          <a class="btn btn-primary btn-full" href="{{ url_for('checkout') }}">Proceed to checkout</a>
+        </aside>
+      </div>
+    {% endif %}
   </div>
 </section>
 {% endblock %}
