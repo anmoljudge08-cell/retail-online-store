@@ -1,55 +1,7 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<section class="page-section">
-  <div class="container checkout-shell">
-    <div class="checkout-card">
-      {% if success %}
-        <span class="eyebrow">Order placed</span>
-        <h2>Thanks for shopping with us.</h2>
-        <p>Your demo order <strong>#{{ order_number }}</strong> has been received.</p>
-        <div class="checkout-summary-box">
-          {% for item in cart_items %}
-            <div class="checkout-row">
-              <span>{{ item.name }} × {{ item.quantity }}</span>
-              <strong>{{ (item.line_total)|money }}</strong>
-            </div>
-          {% endfor %}
-          <div class="checkout-row total-row">
-            <span>Total</span>
-            <strong>{{ subtotal|money }}</strong>
-          </div>
-        </div>
-        <a class="btn btn-primary" href="{{ url_for('catalog') }}">Continue shopping</a>
-      {% else %}
-        <span class="eyebrow">Checkout</span>
-        <h2>Review your order</h2>
-        <div class="checkout-summary-box">
-          {% for item in cart_items %}
-            <div class="checkout-row">
-              <span>{{ item.name }} × {{ item.quantity }}</span>
-              <strong>{{ (item.line_total)|money }}</strong>
-            </div>
-          {% endfor %}
-          <div class="checkout-row total-row">
-            <span>Total</span>
-            <strong>{{ subtotal|money }}</strong>
-          </div>
-        </div>
-
-        <form method="post" action="{{ url_for('checkout') }}" class="auth-form">
-          <label>
-            Shipping address
-            <input type="text" name="address" placeholder="123 Market Street, New Delhi" required />
-          </label>
-          <label>
-            Contact number
-            <input type="tel" name="phone" placeholder="+91 98765 43210" required />
-          </label>
-          <button type="submit" class="btn btn-primary btn-full">Place demo order</button>
-        </form>
-      {% endif %}
-    </div>
-  </div>
-</section>
+<section class="page-section"><div class="container checkout-wrap">
+{% if success %}<div class="checkout-card success-card"><span class="eyebrow">Demo order confirmed</span><div class="success-mark">✓</div><h1>Thanks for your order!</h1><p>Reference: <strong>{{ order_number }}</strong></p><p>This is a demo confirmation. No payment has been processed.</p><div class="summary-box">{% for item in cart_items %}<div class="summary-line"><span>{{ item.name }} × {{ item.quantity }}</span><strong>{{ item.line_total|money }}</strong></div>{% endfor %}<div class="summary-line summary-total"><span>Total</span><strong>{{ subtotal|money }}</strong></div></div><a class="button button-primary" href="{{ url_for('catalog') }}">Back to shopping</a></div>
+{% else %}<div class="checkout-card"><span class="eyebrow">Almost there</span><h1>Demo checkout</h1><p>Review your items and enter a sample delivery address. No payment details are requested.</p><div class="summary-box">{% for item in cart_items %}<div class="summary-line"><span>{{ item.name }} × {{ item.quantity }}</span><strong>{{ item.line_total|money }}</strong></div>{% endfor %}<div class="summary-line summary-total"><span>Total</span><strong>{{ subtotal|money }}</strong></div></div><form method="post" action="{{ url_for('checkout') }}" class="form-stack"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Delivery address<input type="text" name="address" maxlength="500" placeholder="123 Market Street, City" required></label><button class="button button-primary button-wide" type="submit">Place demo order</button></form><p class="fine-print">Demo checkout only. No real payment processing.</p></div>{% endif %}
+</div></section>
 {% endblock %}

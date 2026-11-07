@@ -1,35 +1,4 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<section class="auth-section">
-  <div class="container auth-shell">
-    <div class="auth-card">
-      <span class="eyebrow">Create account</span>
-      <h2>Register for Retail Store</h2>
-      <form method="post" action="{{ url_for('register') }}" class="auth-form">
-        <label>
-          Full name
-          <input type="text" name="name" placeholder="Alex Carter" required />
-        </label>
-        <label>
-          Email address
-          <input type="email" name="email" placeholder="you@example.com" required />
-        </label>
-        <label>
-          Password
-          <input type="password" name="password" placeholder="At least 6 characters" required />
-        </label>
-        <label>
-          Confirm password
-          <input type="password" name="confirm_password" placeholder="Re-enter your password" required />
-        </label>
-        <button type="submit" class="btn btn-primary btn-full">Create account</button>
-      </form>
-      <p class="auth-switch">
-        Already have an account?
-        <a href="{{ url_for('login') }}">Login</a>
-      </p>
-    </div>
-  </div>
-</section>
+<section class="auth-section"><div class="auth-card"><span class="eyebrow">Join the store</span><h1>Create an account</h1><p>Make a demo account to place a sample order.</p><form method="post" action="{{ url_for('register') }}" class="form-stack"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Your name<input type="text" name="name" autocomplete="name" maxlength="100" required></label><label>Email address<input type="email" name="email" autocomplete="email" maxlength="254" required></label><label>Password<input type="password" name="password" autocomplete="new-password" minlength="8" required></label><label>Confirm password<input type="password" name="confirm_password" autocomplete="new-password" minlength="8" required></label><button class="button button-primary button-wide" type="submit">Create account</button></form><p class="auth-switch">Already registered? <a href="{{ url_for('login') }}">Log in</a></p></div></section>
 {% endblock %}
