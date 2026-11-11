@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, product_card with context %}
+
+{% block title %}My account — {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-sm">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">House</a><span>/</span><span>Account</span>
+    </nav>
+    <div class="page-head-row">
+      <div>
+        <h1>{{ current_user.name }}</h1>
+        <p class="page-head-sub">{{ current_user.email }} · member since {{ current_user.created_at | date_human('%b %Y') }}</p>
+      </div>
+      <div class="account-actions">
+        {% if current_user.role == 'admin' %}
+          <a class="btn btn-quiet btn-sm" href="{{ url_for('admin') }}">{{ icon('grid') }} Admin</a>
+        {% endif %}
+        <form method="post" action="{{ url_for('logout') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn btn-quiet btn-sm" type="submit">Sign out</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap account-layout">
+  <div class="account-main">
+    <!-- ------------------------------------------------------------ orders -->
+    <section class="account-section">
+      <header class="account-section-head">
+        <h2>Orders <span class="count-pill">{{ orders | length }}</span></h2>
+        <a class="link-arrow" href="{{ url_for('track') }}">Track an order {{ icon('arrow-right') }}</a>
+      </header>
+
+      {% if orders %}
+        <ul class="order-list">
+          {% for order in orders %}
+          <li class="order-list-item">
+            <div class="order-list-head">
+              <div>
+                <p class="order-number">{{ order.order_number }}</p>
+                <p class="muted">{{ order.created_at | date_human }} · {{ order.line_items | length }} item{{ '' if order.line_items | length == 1 else 's' }}</p>
+              </div>
+              <div class="order-list-right">
+                <span class="status-pill status-{{ order.status | lower }}">{{ order.status }}</span>
+                <strong>{{ money(order.total) }}</strong>
+              </div>
+            </div>
+
+            <div class="order-list-body">
+              <div class="order-thumbs">
+                {% for item in order.line_items[:4] %}
+                  <img src="{{ url_for('static', filename='img/' ~ item.image) }}" alt="{{ item.name }}" width="900" height="1125" loading="lazy">
+                {% endfor %}
+                {% if order.line_items | length > 4 %}<span class="more-thumbs">+{{ order.line_items | length - 4 }}</span>{% endif %}
+              </div>
+              <div class="order-list-actions">
+                <a class="btn btn-quiet btn-sm" href="{{ url_for('order_confirmation', order_number=order.order_number) }}">View order</a>
+                <form method="post" action="{{ url_for('reorder', order_id=order.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <button class="btn btn-quiet btn-sm" type="submit">{{ icon('refresh') }} Buy again</button>
+                </form>
+              </div>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state empty-inline">
+          {{ icon('bag') }}
+          <h3>No orders yet</h3>
+          <p>When you find the right piece, it will live here.</p>
+          <a class="btn btn-dark btn-sm" href="{{ url_for('shop') }}">Explore the collection</a>
+        </div>
+      {% endif %}
+    </section>
+
+    <!-- ---------------------------------------------------------- wishlist -->
+    <section class="account-section" id="wishlist">
+      <header class="account-section-head">
+        <h2>Wishlist <span class="count-pill">{{ wishlist | length }}</span></h2>
+        <a class="link-arrow" href="{{ url_for('shop') }}">Find more {{ icon('arrow-right') }}</a>
+      </header>
+
+      {% if wishlist %}
+        <div class="product-grid product-grid-account">
+          {% for product in wishlist %}{{ product_card(product) }}{% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state empty-inline">
+          {{ icon('heart') }}
+          <h3>Nothing saved yet</h3>
+          <p>Tap the heart on any piece to keep it here while you decide.</p>
+          <a class="btn btn-dark btn-sm" href="{{ url_for('shop') }}">Browse the house</a>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  <!-- ------------------------------------------------------------- sidebar -->
+  <aside class="account-side">
+    <section class="account-card">
+      <h2>At a glance</h2>
+      <dl class="account-stats">
+        <div><dt>Orders</dt><dd>{{ orders | length }}</dd></div>
+        <div><dt>Lifetime spend</dt><dd>{{ money(spent) }}</dd></div>
+        <div><dt>Saved pieces</dt><dd>{{ wishlist | length }}</dd></div>
+      </dl>
+    </section>
+
+    <section class="account-card">
+      <h2>Default address</h2>
+      {% if address %}
+        <address>
+          <strong>{{ address.full_name }}</strong><br>
+          {{ address.address_line }}<br>
+          {{ address.city }}{% if address.state %}, {{ address.state }}{% endif %} {{ address.postal_code }}<br>
+          {{ address.country }}
+        </address>
+        <p class="muted">Taken from your most recent order.</p>
+      {% else %}
+        <p class="muted">No address on file yet — it will be saved with your first order.</p>
+      {% endif %}
+    </section>
+
+    <section class="account-card account-help">
+      <h2>Concierge</h2>
+      <p class="muted">Sizing, repairs, or a second opinion — we answer within a working day.</p>
+      <a class="link-arrow" href="mailto:{{ store.email }}">{{ icon('mail') }} Write to us</a>
+    </section>
+  </aside>
+</div>
+{% endblock %}

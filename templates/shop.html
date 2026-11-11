@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, product_card with context %}
+
+{% block title %}{{ active_category.name if active_category else 'Shop all' }} — {{ store.name }}{% endblock %}
+{% block description %}{{ active_category.blurb if active_category else 'The full Aurum & Ivy collection: audio, timepieces, leather, home, travel and wellness.' }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">House</a><span>/</span>
+      {% if active_category %}
+        <a href="{{ url_for('shop') }}">Shop</a><span>/</span><span>{{ active_category.name }}</span>
+      {% else %}
+        <span>Shop all</span>
+      {% endif %}
+    </nav>
+    <div class="page-head-row">
+      <div>
+        <h1>{{ active_category.name if active_category else 'The complete house' }}</h1>
+        <p class="page-head-sub">
+          {{ active_category.blurb if active_category else 'Every piece we make, in one place. Small batches, long-milled materials, nothing made to be thrown away.' }}
+        </p>
+      </div>
+      <p class="result-count">{{ total }} piece{{ '' if total == 1 else 's' }}{% if query %} for “{{ query }}”{% endif %}</p>
+    </div>
+  </div>
+</section>
+
+<div class="wrap shop-layout">
+  <!-- ------------------------------------------------------------- filters -->
+  <aside class="filters" data-filters>
+    <div class="filters-head">
+      <h2>Refine</h2>
+      <a class="filters-reset" href="{{ url_for('shop') }}">Reset</a>
+    </div>
+
+    <div class="filter-group">
+      <h3>Collection</h3>
+      <ul class="filter-list">
+        <li><a class="{% if not category %}is-active{% endif %}" href="{{ build_url(category='') }}">All pieces <small>{{ total if not category and not query else '' }}</small></a></li>
+        {% for item in categories %}
+          <li>
+            <a class="{% if category == item.slug %}is-active{% endif %}" href="{{ build_url(category=item.slug) }}">
+              {{ item.name }} <small>{{ '%02d'|format(item.count) }}</small>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <form class="filter-group filter-form" method="get" action="{{ url_for('shop') }}">
+      {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+      {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
+      <input type="hidden" name="sort" value="{{ sort }}">
+
+      <h3>Price</h3>
+      <div class="price-inputs">
+        <label><span class="sr-only">Minimum price</span>
+          <input type="number" name="min_price" min="0" step="100" placeholder="Min" value="{{ min_price or '' }}">
+        </label>
+        <span>—</span>
+        <label><span class="sr-only">Maximum price</span>
+          <input type="number" name="max_price" min="0" step="100" placeholder="Max" value="{{ max_price or '' }}">
+        </label>
+      </div>
+      <p class="price-hint">Most pieces sit between {{ money(3200) }} and {{ money(38500) }}.</p>
+
+      <label class="checkbox">
+        <input type="checkbox" name="in_stock" value="1" {% if in_stock %}checked{% endif %}>
+        <span>In stock only</span>
+      </label>
+
+      <button class="btn btn-dark btn-sm btn-block" type="submit">Apply filters</button>
+    </form>
+
+    <div class="filter-note">
+      {{ icon('shield') }}
+      <p><strong>Two-year guarantee</strong><span>Every piece, no exceptions.</span></p>
+    </div>
+  </aside>
+
+  <!-- ------------------------------------------------------------- results -->
+  <section class="shop-results">
+    <div class="shop-toolbar">
+      <button class="btn btn-quiet btn-sm filters-toggle" type="button" data-filters-toggle>Filters {{ icon('grid') }}</button>
+      <div class="active-filters">
+        {% if query %}<a class="chip" href="{{ build_url(q='') }}">“{{ query }}” {{ icon('close') }}</a>{% endif %}
+        {% if active_category %}<a class="chip" href="{{ build_url(category='') }}">{{ active_category.name }} {{ icon('close') }}</a>{% endif %}
+        {% if in_stock %}<a class="chip" href="{{ build_url(in_stock='') }}">In stock {{ icon('close') }}</a>{% endif %}
+        {% if min_price or max_price %}<a class="chip" href="{{ build_url(min_price='', max_price='') }}">Price {{ icon('close') }}</a>{% endif %}
+      </div>
+      <form class="sort-form" method="get" action="{{ url_for('shop') }}" data-autosubmit>
+        {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+        {% if category %}<input type="hidden" name="category" value="{{ category }}">{% endif %}
+        {% if min_price %}<input type="hidden" name="min_price" value="{{ min_price }}">{% endif %}
+        {% if max_price %}<input type="hidden" name="max_price" value="{{ max_price }}">{% endif %}
+        {% if in_stock %}<input type="hidden" name="in_stock" value="1">{% endif %}
+        <label for="sort">Sort</label>
+        <select id="sort" name="sort" data-autosubmit-select>
+          <option value="featured" {% if sort == 'featured' %}selected{% endif %}>Featured</option>
+          <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+          <option value="price-asc" {% if sort == 'price-asc' %}selected{% endif %}>Price, low to high</option>
+          <option value="price-desc" {% if sort == 'price-desc' %}selected{% endif %}>Price, high to low</option>
+          <option value="rating" {% if sort == 'rating' %}selected{% endif %}>Most loved</option>
+          <option value="name" {% if sort == 'name' %}selected{% endif %}>Alphabetical</option>
+        </select>
+        <noscript><button class="btn btn-quiet btn-sm" type="submit">Go</button></noscript>
+      </form>
+    </div>
+
+    {% if products %}
+      <div class="product-grid product-grid-shop">
+        {% for product in products %}{{ product_card(product) }}{% endfor %}
+      </div>
+
+      {% if pages > 1 %}
+      <nav class="pagination" aria-label="Pagination">
+        {% if page > 1 %}
+          <a class="page-arrow" href="{{ page_url(page - 1) }}" aria-label="Previous page">{{ icon('arrow-left') }}</a>
+        {% else %}
+          <span class="page-arrow is-disabled">{{ icon('arrow-left') }}</span>
+        {% endif %}
+        <span class="page-numbers">
+          {% for number in range(1, pages + 1) %}
+            {% if number == page %}
+              <span class="page is-current" aria-current="page">{{ number }}</span>
+            {% else %}
+              <a class="page" href="{{ page_url(number) }}">{{ number }}</a>
+            {% endif %}
+          {% endfor %}
+        </span>
+        {% if page < pages %}
+          <a class="page-arrow" href="{{ page_url(page + 1) }}" aria-label="Next page">{{ icon('arrow-right') }}</a>
+        {% else %}
+          <span class="page-arrow is-disabled">{{ icon('arrow-right') }}</span>
+        {% endif %}
+      </nav>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">
+        {{ icon('search') }}
+        <h2>Nothing matches that yet</h2>
+        <p>Try a broader search, or browse the whole house — {{ product_total }} pieces, each made in small batches.</p>
+        <a class="btn btn-dark" href="{{ url_for('shop') }}">Browse everything</a>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

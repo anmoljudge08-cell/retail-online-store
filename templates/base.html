@@ -1,0 +1,186 @@
+{% from "_macros.html" import icon with context %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0B2B26">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ store.name }} — {{ store.tagline }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ store.name }} is a considered house of objects — audio, timepieces, leather and home, made to be kept.{% endblock %}">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:description" content="{{ self.description() }}">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/store.css') }}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="announce">
+  <div class="wrap announce-inner">
+    <p>{{ icon('truck') }} Complimentary delivery over {{ money(free_shipping_threshold) }}</p>
+    <p class="announce-mid">The Winter Edit — 2026 now in the atelier</p>
+    <p>{{ icon('refresh') }} 30-day returns</p>
+  </div>
+</div>
+
+<header class="site-header" data-header>
+  <div class="wrap header-inner">
+    <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav">
+      {{ icon('menu') }}<span class="sr-only">Menu</span>
+    </button>
+
+    <a class="brand" href="{{ url_for('home') }}">
+      <span class="brand-word">Aurum <em>&amp;</em> Ivy</span>
+      <span class="brand-sub">Est. {{ store.established }}</span>
+    </a>
+
+    <nav class="main-nav" aria-label="Primary">
+      <a href="{{ url_for('shop') }}">Shop all</a>
+      <div class="nav-drop">
+        <button type="button" class="nav-drop-btn" aria-expanded="false" aria-controls="collections-menu">
+          Collections {{ icon('plus', 'icon-xs') }}
+        </button>
+        <div class="nav-drop-panel" id="collections-menu">
+          {% for category in categories %}
+            <a href="{{ url_for('shop', category=category.slug) }}">
+              <span>{{ category.name }}</span><small>{{ '%02d'|format(category.count) }}</small>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      <a href="{{ url_for('home') }}#atelier">The atelier</a>
+      <a href="{{ url_for('track') }}">Track order</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" type="button" data-search-toggle aria-expanded="false" aria-controls="search-panel">
+        {{ icon('search') }}<span class="sr-only">Search</span>
+      </button>
+      <a class="icon-btn" href="{{ url_for('account') if current_user else url_for('login') }}">
+        {{ icon('user') }}<span class="sr-only">{{ 'My account' if current_user else 'Sign in' }}</span>
+      </a>
+      <a class="icon-btn icon-btn-heart" href="{{ url_for('account') }}#wishlist">
+        {{ icon('heart') }}<span class="sr-only">Wishlist</span>
+      </a>
+      <button class="icon-btn cart-btn" type="button" data-cart-open aria-controls="cart-drawer">
+        {{ icon('bag') }}
+        <span class="cart-count" data-cart-count {{ 'hidden' if not cart_count }}>{{ cart_count }}</span>
+        <span class="sr-only">Open bag</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="search-panel" id="search-panel" hidden>
+    <form class="wrap search-form" action="{{ url_for('shop') }}" method="get" role="search">
+      {{ icon('search') }}
+      <input type="search" name="q" placeholder="Search the house — headphones, cashmere, oak…"
+             aria-label="Search products" data-search-input>
+      <button class="btn btn-dark btn-sm" type="submit">Search</button>
+    </form>
+  </div>
+
+  <nav class="mobile-nav" id="mobile-nav" hidden aria-label="Mobile">
+    <a href="{{ url_for('shop') }}">Shop all</a>
+    {% for category in categories %}
+      <a href="{{ url_for('shop', category=category.slug) }}">{{ category.name }} <small>{{ category.count }}</small></a>
+    {% endfor %}
+    <a href="{{ url_for('home') }}#atelier">The atelier</a>
+    <a href="{{ url_for('track') }}">Track order</a>
+    <a href="{{ url_for('account') if current_user else url_for('login') }}">{{ 'My account' if current_user else 'Sign in' }}</a>
+  </nav>
+</header>
+
+<main id="main">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div class="footer-brand">
+      <p class="brand footer-word">Aurum <em>&amp;</em> Ivy</p>
+      <p class="footer-note">A considered house of objects, made in small batches and built to be kept. Mumbai, since {{ store.established }}.</p>
+      <div class="footer-contact">
+        <a href="mailto:{{ store.email }}">{{ icon('mail') }} {{ store.email }}</a>
+        <a href="tel:{{ store.phone | replace(' ', '') }}">{{ icon('phone') }} {{ store.phone }}</a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h2>Shop</h2>
+      {% for category in categories %}
+        <a href="{{ url_for('shop', category=category.slug) }}">{{ category.name }}</a>
+      {% endfor %}
+      <a href="{{ url_for('shop', sort='newest') }}">New arrivals</a>
+    </div>
+
+    <div class="footer-col">
+      <h2>House</h2>
+      <a href="{{ url_for('home') }}#atelier">Our atelier</a>
+      <a href="{{ url_for('home') }}#edit">The Edit</a>
+      <a href="{{ url_for('track') }}">Track an order</a>
+      <a href="{{ url_for('account') }}">My account</a>
+      <a href="{{ url_for('shop', sort='rating') }}">Most loved</a>
+    </div>
+
+    <div class="footer-col footer-col-wide">
+      <h2>The Edit</h2>
+      <p>One letter a month — new pieces, restocks and notes from the atelier.</p>
+      <form class="newsletter" method="post" action="{{ url_for('newsletter') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <label class="sr-only" for="footer-email">Email address</label>
+        <input id="footer-email" type="email" name="email" placeholder="you@example.com" required>
+        <button type="submit" class="btn btn-gold btn-sm">Subscribe</button>
+      </form>
+      <p class="fine-print">By subscribing you agree to our privacy policy. Unsubscribe any time.</p>
+    </div>
+  </div>
+
+  <div class="wrap footer-base">
+    <p>© {{ current_year }} {{ store.name }}. All rights reserved.</p>
+    <p class="footer-legal">
+      <a href="{{ url_for('home') }}#atelier">Shipping &amp; returns</a>
+      <a href="{{ url_for('home') }}#atelier">Care guide</a>
+      <a href="{{ url_for('home') }}#atelier">Privacy</a>
+    </p>
+    <p class="footer-pay">Visa · Mastercard · Amex · UPI · Cash on delivery</p>
+  </div>
+</footer>
+
+<!-- ------------------------------------------------------------- cart drawer -->
+<div class="scrim" data-scrim hidden></div>
+<aside class="cart-drawer" id="cart-drawer" aria-label="Shopping bag" aria-hidden="true">
+  <header class="drawer-head">
+    <h2>Your bag <span data-drawer-count>({{ cart_count }})</span></h2>
+    <button class="icon-btn" type="button" data-cart-close>{{ icon('close') }}<span class="sr-only">Close bag</span></button>
+  </header>
+  <div class="drawer-body" data-drawer-body>
+    <p class="drawer-empty" data-drawer-empty {{ 'hidden' if cart_count }}>Your bag is empty. Everything begins somewhere.</p>
+    <ul class="drawer-list" data-drawer-list></ul>
+  </div>
+  <footer class="drawer-foot">
+    <div class="drawer-total"><span>Subtotal</span><strong data-drawer-subtotal>{{ money(cart_subtotal) }}</strong></div>
+    <p class="drawer-note">GST and delivery calculated at checkout.</p>
+    <a class="btn btn-dark btn-block" href="{{ url_for('checkout') }}">Continue to checkout</a>
+    <a class="btn btn-quiet btn-block" href="{{ url_for('cart') }}">View bag</a>
+  </footer>
+</aside>
+
+<div class="toast-stack" data-toasts>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="toast toast-{{ category }}" role="status">
+        <span>{{ message }}</span>
+        <button class="toast-close" type="button" aria-label="Dismiss">{{ icon('close') }}</button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+<script src="{{ url_for('static', filename='js/store.js') }}" defer></script>
+</body>
+</html>

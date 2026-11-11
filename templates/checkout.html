@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, field with context %}
+
+{% block title %}Checkout — {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-sm">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">House</a><span>/</span>
+      <a href="{{ url_for('cart') }}">Bag</a><span>/</span><span>Checkout</span>
+    </nav>
+    <div class="page-head-row">
+      <div>
+        <h1>Checkout</h1>
+        <p class="page-head-sub">{{ icon('lock') }} Encrypted and private. No card data touches our servers.</p>
+      </div>
+      <ol class="steps">
+        <li class="is-done">Bag</li>
+        <li class="is-current">Details</li>
+        <li>Confirmation</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<form class="wrap checkout-grid" method="post" action="{{ url_for('checkout') }}" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+  <div class="checkout-main">
+    {% if errors %}
+    <div class="form-alert" role="alert">
+      {{ icon('close') }} <p>Please check the highlighted fields and try again.</p>
+    </div>
+    {% endif %}
+
+    <!-- --------------------------------------------------------- contact -->
+    <section class="checkout-section">
+      <div class="checkout-section-head">
+        <span class="step-index">01</span>
+        <div><h2>Contact</h2><p>For the order confirmation and delivery updates.</p></div>
+      </div>
+      <div class="field-row">
+        {{ field('email', 'Email address', form, errors, type='email', placeholder='you@example.com', autocomplete='email') }}
+        {{ field('phone', 'Phone number', form, errors, type='tel', placeholder='+91 98200 11223', autocomplete='tel') }}
+      </div>
+      {% if not current_user %}
+      <p class="inline-note">Have an account? <a href="{{ url_for('login', next=url_for('checkout')) }}">Sign in</a> to fill this in automatically and keep your order history.</p>
+      {% endif %}
+    </section>
+
+    <!-- -------------------------------------------------------- delivery -->
+    <section class="checkout-section">
+      <div class="checkout-section-head">
+        <span class="step-index">02</span>
+        <div><h2>Delivery address</h2><p>We ship across India with insured, tracked couriers.</p></div>
+      </div>
+
+      <div class="field-row">
+        {{ field('full_name', 'Full name', form, errors, placeholder='Ananya Rao', autocomplete='name') }}
+        {{ field('postal_code', 'PIN code', form, errors, placeholder='400050', autocomplete='postal-code', extra='inputmode="numeric" maxlength="6"') }}
+      </div>
+      {{ field('address_line', 'Street address', form, errors, placeholder='Flat, building, street, area', autocomplete='street-address') }}
+      <div class="field-row">
+        {{ field('city', 'City', form, errors, placeholder='Mumbai', autocomplete='address-level2') }}
+        {{ field('state', 'State', form, errors, placeholder='Maharashtra', autocomplete='address-level1', required=false) }}
+      </div>
+
+      <div class="field">
+        <label for="note">Delivery note <span class="optional">optional</span></label>
+        <textarea id="note" name="note" rows="2" placeholder="Landmark, gate code, or a note for the courier">{{ form.note }}</textarea>
+      </div>
+    </section>
+
+    <!-- -------------------------------------------------------- shipping -->
+    <section class="checkout-section">
+      <div class="checkout-section-head">
+        <span class="step-index">03</span>
+        <div><h2>Delivery method</h2><p>All deliveries are insured and require a signature.</p></div>
+      </div>
+
+      <div class="radio-cards">
+        <label class="radio-card">
+          <input type="radio" name="delivery_method" value="standard" {% if form.delivery_method != 'express' %}checked{% endif %} data-delivery-radio>
+          <span class="radio-body">
+            <span class="radio-title">Standard <em>3–5 working days</em></span>
+            <span class="radio-price">{{ 'Complimentary' if totals.shipping == 0 else money(199) }}</span>
+          </span>
+        </label>
+        <label class="radio-card">
+          <input type="radio" name="delivery_method" value="express" {% if form.delivery_method == 'express' %}checked{% endif %} data-delivery-radio>
+          <span class="radio-body">
+            <span class="radio-title">Express <em>1–2 working days</em></span>
+            <span class="radio-price">{{ money(399) }}</span>
+          </span>
+        </label>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------- payment -->
+    <section class="checkout-section">
+      <div class="checkout-section-head">
+        <span class="step-index">04</span>
+        <div><h2>Payment</h2><p>This is a demo storefront — no money is taken and no card is charged.</p></div>
+      </div>
+
+      <div class="radio-cards radio-cards-stack">
+        <label class="radio-card">
+          <input type="radio" name="payment_method" value="card" {% if form.payment_method == 'card' %}checked{% endif %} data-payment-radio>
+          <span class="radio-body">
+            <span class="radio-title">Credit / debit card</span>
+            <span class="radio-icons">Visa · Mastercard · Amex</span>
+          </span>
+        </label>
+        <div class="payment-panel" data-payment-panel="card">
+          <div class="field">
+            <label for="card_number">Card number</label>
+            <input id="card_number" name="card_number" inputmode="numeric" placeholder="4242 4242 4242 4242" autocomplete="off" maxlength="19">
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="card_expiry">Expiry</label><input id="card_expiry" name="card_expiry" placeholder="MM / YY" autocomplete="off" maxlength="7"></div>
+            <div class="field"><label for="card_cvc">CVC</label><input id="card_cvc" name="card_cvc" placeholder="123" inputmode="numeric" autocomplete="off" maxlength="4"></div>
+          </div>
+        </div>
+
+        <label class="radio-card">
+          <input type="radio" name="payment_method" value="upi" {% if form.payment_method == 'upi' %}checked{% endif %} data-payment-radio>
+          <span class="radio-body">
+            <span class="radio-title">UPI</span>
+            <span class="radio-icons">GPay · PhonePe · Paytm</span>
+          </span>
+        </label>
+        <div class="payment-panel" data-payment-panel="upi" hidden>
+          <div class="field">
+            <label for="upi_id">UPI ID</label>
+            <input id="upi_id" name="upi_id" placeholder="name@bank" autocomplete="off">
+          </div>
+        </div>
+
+        <label class="radio-card">
+          <input type="radio" name="payment_method" value="cod" {% if form.payment_method == 'cod' %}checked{% endif %} data-payment-radio>
+          <span class="radio-body">
+            <span class="radio-title">Cash on delivery <em>pay the courier</em></span>
+            <span class="radio-icons">Available across India</span>
+          </span>
+        </label>
+      </div>
+
+      <label class="checkbox checkbox-terms{% if errors.terms %} has-error{% endif %}">
+        <input type="checkbox" name="terms" value="1" required>
+        <span>I agree to the <a href="{{ url_for('home') }}#atelier">terms of sale</a> and the 30-day returns policy.</span>
+      </label>
+      {% if errors.terms %}<p class="field-error">{{ errors.terms }}</p>{% endif %}
+    </section>
+  </div>
+
+  <!-- ------------------------------------------------------------- summary -->
+  <aside class="summary summary-sticky">
+    <h2 class="summary-title">Your order <a class="summary-edit" href="{{ url_for('cart') }}">Edit</a></h2>
+
+    <ul class="summary-items">
+      {% for line in lines %}
+      <li>
+        <span class="summary-thumb">
+          <img src="{{ url_for('static', filename='img/' ~ line.image) }}" alt="{{ line.name }}" width="900" height="1125" loading="lazy">
+          <span class="summary-qty">{{ line.quantity }}</span>
+        </span>
+        <span class="summary-item-body">
+          <span class="summary-item-name">{{ line.name }}</span>
+          <span class="summary-item-variant">{{ line.variant }}</span>
+        </span>
+        <span class="summary-item-price">{{ money(line.line_total) }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <dl class="summary-lines" data-summary
+        data-shipping-standard="{{ standard_shipping }}"
+        data-shipping-express="399"
+        data-shipping-current="{{ totals.shipping }}"
+        data-total="{{ totals.total }}">
+      <div><dt>Subtotal</dt><dd>{{ money(totals.subtotal) }}</dd></div>
+      {% if totals.discount %}
+        <div class="is-discount"><dt>Discount <span class="promo-tag">{{ totals.promo_code }}</span></dt><dd>−{{ money(totals.discount) }}</dd></div>
+      {% endif %}
+      <div><dt>Delivery</dt><dd data-shipping-line>{% if totals.shipping %}{{ money(totals.shipping) }}{% else %}<span class="is-free">Complimentary</span>{% endif %}</dd></div>
+      <div><dt>GST ({{ totals.tax_rate }}%)</dt><dd>{{ money(totals.tax) }}</dd></div>
+      <div class="summary-total"><dt>Total</dt><dd data-total-line>{{ money(totals.total) }}</dd></div>
+    </dl>
+
+    {% if promo_code %}
+    <p class="promo-applied promo-applied-static">{{ icon('check') }} {{ promo_code }} applied</p>
+    {% endif %}
+
+    <button class="btn btn-dark btn-block btn-lg" type="submit">Place order</button>
+    <p class="summary-note">{{ icon('shield') }} You can cancel within an hour of ordering, no reason needed.</p>
+    <ul class="summary-perks">
+      <li>{{ icon('lock') }} 256-bit encrypted</li>
+      <li>{{ icon('refresh') }} 30-day returns</li>
+      <li>{{ icon('mail') }} Concierge support</li>
+    </ul>
+  </aside>
+</form>
+{% endblock %}

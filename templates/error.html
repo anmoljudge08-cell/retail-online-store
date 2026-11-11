@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+
+{% block title %}{{ code }} — {{ title }} · {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="error-page">
+  <div class="wrap error-inner">
+    <p class="error-code">{{ code }}</p>
+    <p class="eyebrow"><span class="rule"></span> {{ title }}</p>
+    <h1>{{ message }}</h1>
+    <p class="error-sub">If it keeps happening, write to <a href="mailto:{{ store.email }}">{{ store.email }}</a> and we will sort it out.</p>
+    <div class="error-actions">
+      <a class="btn btn-dark" href="{{ url_for('home') }}">{{ icon('arrow-left') }} Back to the house</a>
+      <a class="btn btn-quiet" href="{{ url_for('shop') }}">Browse the collection</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

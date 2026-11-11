@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Local data (the demo database is generated on first run)
+instance/
+*.db
+*.sqlite3
+*.db-wal
+*.db-shm
+
+# Tooling
+.vercel/
+.env
+.env.*
+.DS_Store
+node_modules/

@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, product_card, stars with context %}
+
+{% block title %}{{ store.name }} — {{ store.tagline }}{% endblock %}
+
+{% block content %}
+<!-- ------------------------------------------------------------------ hero -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow"><span class="rule"></span> The Winter Edit — 2026</p>
+      <h1>Objects of<br><em>quiet luxury</em>,<br>made to be kept.</h1>
+      <p class="lede">
+        Brass, cashmere, oak and full-grain leather. Ten pieces, made in small batches by people
+        we know by name — and finished to outlive the season they were bought in.
+      </p>
+      <div class="hero-cta">
+        <a class="btn btn-dark" href="{{ url_for('shop') }}">Explore the collection {{ icon('arrow-right') }}</a>
+        <a class="btn btn-quiet" href="#atelier">Inside the atelier</a>
+      </div>
+      <ul class="hero-points">
+        <li>{{ icon('check') }} 30-day returns</li>
+        <li>{{ icon('check') }} Two-year guarantee</li>
+        <li>{{ icon('check') }} Shipped from Mumbai</li>
+      </ul>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-frame">
+        <img src="{{ url_for('static', filename='img/hero-audio.jpg') }}"
+             alt="Ivory and brass Meridian headphones on a warm ivory background"
+             width="1000" height="750" fetchpriority="high">
+      </div>
+      {% if hero_product %}
+      <a class="hero-card" href="{{ url_for('product_detail', slug=hero_product.slug) }}">
+        <span class="hero-card-flag">{{ hero_product.badge or 'Signature' }}</span>
+        <span class="hero-card-name">{{ hero_product.name }}</span>
+        <span class="hero-card-meta">{{ stars(hero_product.rating_avg, small=true) }} {{ money(hero_product.price) }}</span>
+      </a>
+      {% endif %}
+      <p class="hero-caption">Meridian ANC Headphones — full-grain leather, machined brass</p>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------- assurances -->
+<section class="assurances">
+  <div class="wrap assurance-grid">
+    <div class="assurance">{{ icon('truck') }}<div><strong>Complimentary delivery</strong><span>On every order above {{ money(free_shipping_threshold) }}</span></div></div>
+    <div class="assurance">{{ icon('refresh') }}<div><strong>Thirty-day returns</strong><span>Unworn, unopened, no questions</span></div></div>
+    <div class="assurance">{{ icon('shield') }}<div><strong>Two-year guarantee</strong><span>Repairs handled in-house</span></div></div>
+    <div class="assurance">{{ icon('lock') }}<div><strong>Secure checkout</strong><span>256-bit encryption, UPI ready</span></div></div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------- collections -->
+<section class="section collections">
+  <div class="wrap">
+    <header class="section-head">
+      <div>
+        <p class="eyebrow"><span class="rule"></span> Collections</p>
+        <h2>Six houses under one roof</h2>
+      </div>
+      <a class="link-arrow" href="{{ url_for('shop') }}">Shop all {{ product_total }} pieces {{ icon('arrow-right') }}</a>
+    </header>
+
+    <div class="collection-grid">
+      {% for category in categories %}
+      <a class="collection{% if loop.first %} collection-wide{% endif %}" href="{{ url_for('shop', category=category.slug) }}">
+        <img src="{{ url_for('static', filename='img/' ~ category.image) }}" alt="{{ category.name }}" loading="lazy" width="900" height="1125">
+        <span class="collection-body">
+          <span class="collection-count">{{ '%02d'|format(category.count) }} pieces</span>
+          <span class="collection-name">{{ category.name }}</span>
+          <span class="collection-blurb">{{ category.blurb }}</span>
+        </span>
+        <span class="collection-arrow">{{ icon('arrow-right') }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ---------------------------------------------------------------- featured -->
+<section class="section featured">
+  <div class="wrap">
+    <header class="section-head">
+      <div>
+        <p class="eyebrow"><span class="rule"></span> The Winter Edit</p>
+        <h2>Pieces worth the wait</h2>
+        <p class="section-sub">Small batches, long-milled materials, and finishes that improve with handling.</p>
+      </div>
+      <a class="link-arrow" href="{{ url_for('shop') }}">View the full edit {{ icon('arrow-right') }}</a>
+    </header>
+
+    <div class="product-grid">
+      {% for product in featured %}{{ product_card(product) }}{% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------------- atelier -->
+<section class="atelier" id="atelier">
+  <div class="wrap atelier-grid">
+    <figure class="atelier-media">
+      <img src="{{ url_for('static', filename='img/story-atelier.jpg') }}" alt="The Atlas weekender in the atelier"
+           loading="lazy" width="1200" height="800">
+      <figcaption>Atlas Weekender — cut, stitched and burnished by hand in Fort, Mumbai.</figcaption>
+    </figure>
+
+    <div class="atelier-copy">
+      <p class="eyebrow eyebrow-light"><span class="rule"></span> The atelier</p>
+      <h2>Made slowly, on purpose.</h2>
+      <p>
+        Aurum &amp; Ivy began in a two-room workshop in Kala Ghoda with a single bench, a leather
+        knife and a stubborn idea: that everyday objects should be worth repairing. Twelve years
+        later we still make in batches of no more than forty, still burnish every edge by hand,
+        and still name the person who made your piece on the card inside the box.
+      </p>
+      <ul class="atelier-list">
+        <li>{{ icon('leaf') }} <div><strong>Materials with a paper trail</strong><span>Vegetable-tanned leather, Grade-A cashmere, FSC-certified oak.</span></div></li>
+        <li>{{ icon('refresh') }} <div><strong>Repairs, not replacements</strong><span>Send anything back for servicing — we keep parts for a decade.</span></div></li>
+        <li>{{ icon('sparkle') }} <div><strong>Small batches only</strong><span>Forty pieces at a time, so nothing is made to be thrown away.</span></div></li>
+      </ul>
+      <div class="atelier-stats">
+        <div><strong>{{ current_year - store.established }}</strong><span>Years of making</span></div>
+        <div><strong>{{ product_total }}</strong><span>Pieces in the house</span></div>
+        <div><strong>{{ review_count }}</strong><span>Owner reviews</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- -------------------------------------------------------------------- edit -->
+<section class="section edit" id="edit">
+  <div class="wrap">
+    <header class="section-head">
+      <div>
+        <p class="eyebrow"><span class="rule"></span> The Edit</p>
+        <h2>How to live with it</h2>
+      </div>
+      <a class="link-arrow" href="{{ url_for('shop', sort='rating') }}">Most loved {{ icon('arrow-right') }}</a>
+    </header>
+
+    <div class="edit-grid">
+      <article class="edit-card">
+        <img src="{{ url_for('static', filename='img/halo-lamp.jpg') }}" alt="Halo brass desk lamp" loading="lazy" width="900" height="1125">
+        <div class="edit-body">
+          <p class="eyebrow">No. 01 — Light</p>
+          <h3>Six square feet of calm</h3>
+          <p>A desk is a state of mind. Warm brass, a dimmable bulb, and everything else out of arm's reach.</p>
+          <a class="link-arrow" href="{{ url_for('shop', category='home') }}">Shop home {{ icon('arrow-right') }}</a>
+        </div>
+      </article>
+      <article class="edit-card">
+        <img src="{{ url_for('static', filename='img/nocturne-throw.jpg') }}" alt="Nocturne cashmere throw" loading="lazy" width="900" height="1125">
+        <div class="edit-body">
+          <p class="eyebrow">No. 02 — Rest</p>
+          <h3>Cashmere, all winter</h3>
+          <p>620 grams of three-ply Himalayan cashmere. Folded on the arm of a chair, it is the whole point of winter.</p>
+          <a class="link-arrow" href="{{ url_for('shop', category='home') }}">Shop home {{ icon('arrow-right') }}</a>
+        </div>
+      </article>
+      <article class="edit-card">
+        <img src="{{ url_for('static', filename='img/ember-pourover.jpg') }}" alt="Ember pour-over set" loading="lazy" width="900" height="1125">
+        <div class="edit-body">
+          <p class="eyebrow">No. 03 — Ritual</p>
+          <h3>Four minutes, unhurried</h3>
+          <p>Grind, bloom, pour. A hand-thrown cone and a carafe that pours without a drip.</p>
+          <a class="link-arrow" href="{{ url_for('shop', category='home') }}">Shop home {{ icon('arrow-right') }}</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ------------------------------------------------------------- testimonials -->
+<section class="section testimonials">
+  <div class="wrap">
+    <header class="section-head section-head-center">
+      <div>
+        <p class="eyebrow"><span class="rule"></span> From the people who own it</p>
+        <h2>{{ review_count }} owner reviews, {{ '%.1f'|format(average_rating) }} out of five</h2>
+      </div>
+    </header>
+
+    <div class="testimonial-grid">
+      {% for review in testimonials %}
+      <figure class="testimonial">
+        {{ stars(review.rating) }}
+        <blockquote>{{ review.body }}</blockquote>
+        <figcaption>
+          <span>{{ review.author }}</span>
+          <a href="{{ url_for('product_detail', slug=review.product_slug) }}">{{ review.product_name }}</a>
+        </figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- --------------------------------------------------------------- concierge -->
+<section class="concierge">
+  <div class="wrap concierge-inner">
+    <div>
+      <p class="eyebrow eyebrow-light"><span class="rule"></span> The concierge</p>
+      <h2>Not sure which piece is yours?</h2>
+      <p>Tell us the room, the trip or the person. We will write back within a working day with two or three honest suggestions.</p>
+    </div>
+    <div class="concierge-actions">
+      <a class="btn btn-gold" href="mailto:{{ store.email }}">{{ icon('mail') }} Email the concierge</a>
+      <a class="btn btn-outline-light" href="{{ url_for('track') }}">Track an order</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
