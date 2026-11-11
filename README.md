@@ -122,6 +122,17 @@ vercel                 # preview deploy
 vercel --prod          # production
 ```
 
+`vercel.json` rewrites every request — assets included — to the Python function, and bundles
+`templates/**` and `static/**` into it, so Flask serves the stylesheet and images itself. Nothing
+depends on Vercel's own static-file handling. Asset URLs carry a `?v=` version so a previously
+cached miss cannot mask a new deploy, and `GET /health` reports whether the CSS, JS and product
+images are present in the running bundle.
+
+Check a deployment with these two URLs:
+
+* `/static/css/store.css?v=3` → should return CSS, not 404
+* `/health` → `{"status":"ok","assets":{"css/store.css":true,…}}`
+
 Set these environment variables in the Vercel project:
 
 | Variable | Why |

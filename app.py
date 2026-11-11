@@ -48,6 +48,9 @@ app.config.update(
     TEMPLATES_AUTO_RELOAD=True,
 )
 
+# Bump to invalidate cached CSS/JS URLs (query-string versioning).
+ASSET_VERSION = os.environ.get("ASSET_VERSION", "3")
+
 # Production tightens framing; the sandbox/preview needs to be embeddable in an iframe.
 PRODUCTION = bool(os.environ.get("VERCEL") or os.environ.get("STORE_ENV") == "production")
 
@@ -373,6 +376,7 @@ def inject_globals():
         "current_user": g.get("user"),
         "wishlist_ids": wishlist_ids(),
         "csrf_token": session.get("csrf_token", ""),
+        "asset_version": ASSET_VERSION,
         "current_year": datetime.now(timezone.utc).year,
         "free_shipping_threshold": catalog.SHIPPING["free_threshold"],
         "order_statuses": ORDER_STATUSES,
@@ -1114,12 +1118,23 @@ def admin_update_stock(product_id: int):
 # --------------------------------------------------------------------------- meta
 @app.get("/health")
 def health():
+    assets = {
+        name: (BASE_DIR / "static" / name).is_file()
+        for name in ("css/store.css", "js/store.js", "img/meridian-headphones.jpg")
+    }
     try:
         get_db().execute("SELECT 1").fetchone()
-        return jsonify({"status": "ok", "database": db.database_path()})
     except sqlite3.Error:
         app.logger.exception("health check failed")
-        return jsonify({"status": "error"}), 503
+        return jsonify({"status": "error", "assets": assets}), 503
+    return jsonify(
+        {
+            "status": "ok",
+            "database": db.database_path(),
+            "assets": assets,
+            "asset_version": ASSET_VERSION,
+        }
+    )
 
 
 @app.errorhandler(400)
