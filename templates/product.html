@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, product_card, stars with context %}
+
+{% block title %}{{ product.name }} — {{ store.name }}{% endblock %}
+{% block description %}{{ product.summary }}{% endblock %}
+
+{% block content %}
+<nav class="crumbs crumbs-bar" aria-label="Breadcrumb">
+  <div class="wrap">
+    <a href="{{ url_for('home') }}">House</a><span>/</span>
+    <a href="{{ url_for('shop') }}">Shop</a><span>/</span>
+    <a href="{{ url_for('shop', category=product.category) }}">{{ product.category_name }}</a><span>/</span>
+    <span>{{ product.name }}</span>
+  </div>
+</nav>
+
+<section class="wrap product-layout">
+  <!-- --------------------------------------------------------------- media -->
+  <div class="product-media">
+    <figure class="product-frame">
+      <img src="{{ url_for('static', filename='img/' ~ product.image) }}" alt="{{ product.name }}"
+           width="900" height="1125" fetchpriority="high">
+      {% if product.badge %}<span class="flag flag-media">{{ product.badge }}</span>{% endif %}
+    </figure>
+    <div class="product-media-notes">
+      <span>{{ icon('leaf') }} Made in small batches</span>
+      <span>{{ icon('refresh') }} 30-day returns</span>
+      <span>{{ icon('shield') }} Two-year guarantee</span>
+    </div>
+  </div>
+
+  <!-- ---------------------------------------------------------------- info -->
+  <div class="product-info">
+    <p class="eyebrow">{{ product.category_name }}</p>
+    <h1>{{ product.name }}</h1>
+    <p class="product-tagline">{{ product.tagline }}</p>
+
+    <div class="product-rating">
+      {{ stars(product.rating_avg) }}
+      <a href="#reviews">{{ '%.1f'|format(product.rating_avg) }} · {{ review_total }} review{{ '' if review_total == 1 else 's' }}</a>
+      <span class="dot">·</span>
+      <span class="product-sku">No. {{ '%03d'|format(product.id) }}</span>
+    </div>
+
+    <div class="product-price">
+      <span class="price-now">{{ money(product.price) }}</span>
+      {% if product.compare_at and product.compare_at > product.price %}
+        <s class="price-was">{{ money(product.compare_at) }}</s>
+        <span class="price-save">Save {{ money(product.compare_at - product.price) }}</span>
+      {% endif %}
+      <span class="price-tax">GST added at checkout</span>
+    </div>
+
+    <p class="product-summary">{{ product.summary }}</p>
+
+    <form class="buy-form" method="post" action="{{ url_for('cart_add') }}" data-cart-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+      <input type="hidden" name="next" value="{{ url_for('cart') }}">
+
+      {% if product.variants_list %}
+      <fieldset class="variant-field">
+        <legend>Finish <span data-variant-label>{{ product.variants_list[0] }}</span></legend>
+        <div class="variant-options">
+          {% for variant in product.variants_list %}
+          <label class="variant">
+            <input type="radio" name="variant" value="{{ variant }}" {% if loop.first %}checked{% endif %} data-variant-input>
+            <span>{{ variant }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endif %}
+
+      <div class="buy-row">
+        <div class="stepper" data-stepper>
+          <button type="button" class="stepper-btn" data-step="-1" aria-label="Decrease quantity">{{ icon('minus') }}</button>
+          <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.stock if product.stock > 0 else 1 }}" inputmode="numeric" aria-label="Quantity">
+          <button type="button" class="stepper-btn" data-step="1" aria-label="Increase quantity">{{ icon('plus') }}</button>
+        </div>
+        <button class="btn btn-dark btn-add" type="submit" {{ 'disabled' if product.stock <= 0 }}>
+          {{ icon('bag') }} {{ 'Sold out' if product.stock <= 0 else 'Add to bag' }}
+        </button>
+      </div>
+
+      {% if product.stock <= 0 %}
+        <p class="stock-note is-out">This piece is sold out. The next batch arrives in six weeks.</p>
+      {% elif product.stock <= 3 %}
+        <p class="stock-note is-low">{{ icon('sparkle') }} Only {{ product.stock }} left in this batch</p>
+      {% else %}
+        <p class="stock-note">In stock — ships within 48 hours from Mumbai.</p>
+      {% endif %}
+    </form>
+
+    <form class="save-form" method="post" action="{{ url_for('wishlist_toggle') }}" data-wishlist-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="slug" value="{{ product.slug }}">
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <button type="submit" class="link-btn{% if product.id in wishlist_ids %} is-saved{% endif %}" data-wishlist-btn>
+        {{ icon('heart') }} <span>{{ 'Saved to wishlist' if product.id in wishlist_ids else 'Save for later' }}</span>
+      </button>
+    </form>
+
+    <div class="accordion">
+      <details open>
+        <summary>Details <span class="summary-icon">{{ icon('plus') }}</span></summary>
+        <ul class="detail-list">
+          {% for detail in product.details_list %}<li>{{ detail }}</li>{% endfor %}
+        </ul>
+      </details>
+      <details>
+        <summary>Materials &amp; care <span class="summary-icon">{{ icon('plus') }}</span></summary>
+        <p>{{ product.materials }}</p>
+        <p class="muted">Wipe with a dry cloth. Avoid solvents. Brass is left unlacquered and will darken with use — that is the point.</p>
+      </details>
+      <details>
+        <summary>Delivery &amp; returns <span class="summary-icon">{{ icon('plus') }}</span></summary>
+        <p>Standard delivery is complimentary above {{ money(free_shipping_threshold) }}, otherwise {{ money(199) }}. Express delivery is {{ money(399) }} and arrives in one to two days.</p>
+        <p class="muted">Return anything unworn within 30 days for a full refund. Repairs are handled in-house, for as long as we have parts.</p>
+      </details>
+    </div>
+
+    <div class="product-assist">
+      {{ icon('mail') }}
+      <p>Questions? <a href="mailto:{{ store.email }}">Write to the concierge</a> — a person replies within a working day.</p>
+    </div>
+  </div>
+</section>
+
+<!-- --------------------------------------------------------------- narrative -->
+<section class="product-story">
+  <div class="wrap product-story-inner">
+    <p class="eyebrow eyebrow-light"><span class="rule"></span> The making</p>
+    <p class="story-lede">{{ product.description }}</p>
+    <a class="link-arrow link-arrow-light" href="{{ url_for('home') }}#atelier">Inside the atelier {{ icon('arrow-right') }}</a>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------------- reviews -->
+<section class="section reviews" id="reviews">
+  <div class="wrap">
+    <header class="section-head">
+      <div>
+        <p class="eyebrow"><span class="rule"></span> Owner reviews</p>
+        <h2>{{ '%.1f'|format(product.rating_avg) }} out of five, from {{ review_total }} owner{{ '' if review_total == 1 else 's' }}</h2>
+      </div>
+    </header>
+
+    <div class="reviews-layout">
+      <aside class="reviews-summary">
+        <p class="review-score">{{ '%.1f'|format(product.rating_avg) }}</p>
+        {{ stars(product.rating_avg) }}
+        <p class="muted">{{ review_total }} verified review{{ '' if review_total == 1 else 's' }}</p>
+        <ul class="review-bars">
+          {% for star, count in distribution.items() %}
+          <li>
+            <span>{{ star }} {{ icon('star', 'icon-xs') }}</span>
+            <span class="bar"><span style="width: {{ (count / review_total * 100) if review_total else 0 }}%"></span></span>
+            <span class="bar-count">{{ count }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </aside>
+
+      <div class="reviews-main">
+        {% if reviews %}
+          <ol class="review-list">
+            {% for review in reviews %}
+            <li class="review">
+              <div class="review-head">
+                {{ stars(review.rating, small=true) }}
+                <time datetime="{{ review.created_at }}">{{ review.created_at | date_human }}</time>
+              </div>
+              {% if review.title %}<h3>{{ review.title }}</h3>{% endif %}
+              <p>{{ review.body }}</p>
+              <p class="review-author">{{ review.author }} <span>· Verified owner</span></p>
+            </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="muted">No reviews yet. Be the first to write one.</p>
+        {% endif %}
+
+        <div class="review-form-wrap">
+          <h3>Write a review</h3>
+          {% if current_user and not has_reviewed %}
+          <form class="review-form" method="post" action="{{ url_for('add_review', slug=product.slug) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <fieldset class="rating-field">
+              <legend>Your rating</legend>
+              <div class="rating-stars">
+                {% for value in [5, 4, 3, 2, 1] %}
+                <label>
+                  <input type="radio" name="rating" value="{{ value }}" {% if value == 5 %}checked{% endif %} required>
+                  <span>{{ icon('star') }}<em class="sr-only">{{ value }} stars</em></span>
+                </label>
+                {% endfor %}
+              </div>
+            </fieldset>
+            <div class="field">
+              <label for="review-title">Headline</label>
+              <input id="review-title" name="title" maxlength="120" placeholder="Sum it up in a line">
+            </div>
+            <div class="field">
+              <label for="review-body">Your review</label>
+              <textarea id="review-body" name="body" rows="4" maxlength="1200" placeholder="How does it live in your home?"></textarea>
+            </div>
+            <button class="btn btn-dark" type="submit">Publish review</button>
+          </form>
+          {% elif current_user %}
+            <p class="muted">Thank you — you have already reviewed this piece.</p>
+          {% else %}
+            <p class="muted">Only owners with an account can review. <a href="{{ url_for('login', next=request.path) }}">Sign in</a> to add yours.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ----------------------------------------------------------------- related -->
+<section class="section related">
+  <div class="wrap">
+    <header class="section-head">
+      <div>
+        <p class="eyebrow"><span class="rule"></span> Complements</p>
+        <h2>Also from {{ product.category_name }}</h2>
+      </div>
+      <a class="link-arrow" href="{{ url_for('shop', category=product.category) }}">See the collection {{ icon('arrow-right') }}</a>
+    </header>
+    <div class="product-grid">
+      {% for item in related %}{{ product_card(item) }}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

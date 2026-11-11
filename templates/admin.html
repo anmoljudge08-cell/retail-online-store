@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+
+{% block title %}Atelier admin — {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="page-head page-head-sm">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">House</a><span>/</span><span>Admin</span>
+    </nav>
+    <div class="page-head-row">
+      <div>
+        <h1>Atelier dashboard</h1>
+        <p class="page-head-sub">Orders, inventory and the shape of the house. Signed in as {{ current_user.email }}.</p>
+      </div>
+      <a class="btn btn-quiet btn-sm" href="{{ url_for('shop') }}">View storefront</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap admin">
+  <div class="stat-grid">
+    <div class="stat"><span class="stat-label">Revenue</span><strong>{{ money(stats.revenue) }}</strong><small>Excluding cancelled orders</small></div>
+    <div class="stat"><span class="stat-label">Orders</span><strong>{{ stats.orders }}</strong><small>All time</small></div>
+    <div class="stat"><span class="stat-label">Customers</span><strong>{{ stats.customers }}</strong><small>{{ stats.subscribers }} newsletter subscribers</small></div>
+    <div class="stat"><span class="stat-label">Low stock</span><strong>{{ stats.low_stock }}</strong><small>Pieces at three or fewer</small></div>
+  </div>
+
+  <section class="admin-panel">
+    <header class="admin-panel-head">
+      <h2>Recent orders</h2>
+      <p class="muted">Update the stage as pieces move through the atelier.</p>
+    </header>
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr><th>Order</th><th>Customer</th><th>Placed</th><th>Total</th><th>Status</th><th class="cell-action">Update</th></tr>
+        </thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td><a href="{{ url_for('order_confirmation', order_number=order.order_number) }}">{{ order.order_number }}</a></td>
+            <td>{{ order.full_name }}<br><small class="muted">{{ order.email }}</small></td>
+            <td>{{ order.created_at | date_human }}</td>
+            <td>{{ money(order.total) }}</td>
+            <td><span class="status-pill status-{{ order.status | lower }}">{{ order.status }}</span></td>
+            <td class="cell-action">
+              <form class="inline-form" method="post" action="{{ url_for('admin_update_status', order_id=order.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <select name="status" aria-label="Status for {{ order.order_number }}">
+                  {% for status in order_statuses %}
+                  <option value="{{ status }}" {% if status == order.status %}selected{% endif %}>{{ status }}</option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn-quiet btn-xs" type="submit">Save</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="admin-split">
+    <section class="admin-panel">
+      <header class="admin-panel-head"><h2>Inventory</h2><p class="muted">Stock levels update live at checkout.</p></header>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Piece</th><th>Price</th><th>Stock</th><th class="cell-action">Set</th></tr></thead>
+          <tbody>
+            {% for product in inventory %}
+            <tr>
+              <td>{{ product.name }}<br><small class="muted">{{ product.category | capitalize }}</small></td>
+              <td>{{ money(product.price) }}</td>
+              <td><span class="stock-dot{% if product.stock <= 3 %} is-low{% endif %}"></span>{{ product.stock }}</td>
+              <td class="cell-action">
+                <form class="inline-form" method="post" action="{{ url_for('admin_update_stock', product_id=product.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                  <input class="stock-input" type="number" name="stock" min="0" max="999" value="{{ product.stock }}" aria-label="Stock for {{ product.name }}">
+                  <button class="btn btn-quiet btn-xs" type="submit">Save</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="admin-panel">
+      <header class="admin-panel-head"><h2>Best sellers</h2><p class="muted">By units sold.</p></header>
+      <ul class="best-sellers">
+        {% for row in best_sellers %}
+        <li>
+          <span class="rank">{{ '%02d'|format(loop.index) }}</span>
+          <span class="best-name">{{ row.name }}</span>
+          <span class="best-units">{{ row.units }} units</span>
+          <span class="best-revenue">{{ money(row.revenue) }}</span>
+        </li>
+        {% else %}
+        <li class="muted">No sales yet.</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+{% endblock %}

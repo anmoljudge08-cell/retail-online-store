@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon, field with context %}
+
+{% block title %}Create an account — {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="auth">
+  <div class="auth-art">
+    <div class="auth-art-copy">
+      <p class="eyebrow eyebrow-light"><span class="rule"></span> Join the house</p>
+      <h2>Made to be kept.</h2>
+      <p>An account keeps your orders, your saved pieces and your place in line for each new batch.</p>
+      <ul class="auth-list">
+        <li>{{ icon('check') }} One-click reordering</li>
+        <li>{{ icon('check') }} A wishlist that travels with you</li>
+        <li>{{ icon('check') }} Notes from the atelier, once a month</li>
+      </ul>
+    </div>
+    <img src="{{ url_for('static', filename='img/nocturne-throw.jpg') }}" alt="" width="900" height="1125" loading="lazy">
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-form-wrap">
+      <p class="eyebrow"><span class="rule"></span> New here</p>
+      <h1>Create an account</h1>
+      <p class="auth-sub">Already with us? <a href="{{ url_for('login', next=request.args.get('next')) }}">Sign in</a></p>
+
+      <form class="auth-form" method="post" action="{{ url_for('register', next=request.args.get('next')) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {{ field('name', 'Full name', form, errors, placeholder='Ananya Rao', autocomplete='name') }}
+        {{ field('email', 'Email address', form, errors, type='email', placeholder='you@example.com', autocomplete='email') }}
+        {{ field('password', 'Password', form, errors, type='password', placeholder='At least 8 characters', autocomplete='new-password') }}
+        {{ field('confirm_password', 'Confirm password', form, errors, type='password', placeholder='Repeat your password', autocomplete='new-password') }}
+
+        <div class="field field-honeypot" aria-hidden="true">
+          <label for="website">Leave this empty</label>
+          <input id="website" type="text" name="website" tabindex="-1" autocomplete="off">
+        </div>
+
+        <label class="checkbox">
+          <input type="checkbox" name="updates" value="1" checked>
+          <span>Send me The Edit — one letter a month. Unsubscribe any time.</span>
+        </label>
+
+        <button class="btn btn-dark btn-block btn-lg" type="submit">Create account {{ icon('arrow-right') }}</button>
+        <p class="fine-print">By creating an account you agree to our terms of sale and privacy policy.</p>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

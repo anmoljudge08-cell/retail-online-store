@@ -1,0 +1,132 @@
+{# ---------------------------------------------------------------------------
+   Shared icons, stars and the product card used across the storefront.
+   --------------------------------------------------------------------------- #}
+
+{% macro icon(name, extra='') -%}
+<svg class="icon {{ extra }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none"
+     stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  {%- if name == 'search' -%}
+    <circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>
+  {%- elif name == 'bag' -%}
+    <path d="M6 8h12l1 12H5L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+  {%- elif name == 'user' -%}
+    <circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.5 7-5.5s5.8 1.9 7 5.5"/>
+  {%- elif name == 'heart' -%}
+    <path d="M12 20s-7.5-4.6-7.5-9.4A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.5 3c0 4.8-7.5 9.4-7.5 9.4Z"/>
+  {%- elif name == 'close' -%}
+    <path d="M6 6l12 12M18 6L6 18"/>
+  {%- elif name == 'plus' -%}
+    <path d="M12 5v14M5 12h14"/>
+  {%- elif name == 'minus' -%}
+    <path d="M5 12h14"/>
+  {%- elif name == 'arrow-right' -%}
+    <path d="M4 12h15M13 6l6 6-6 6"/>
+  {%- elif name == 'arrow-left' -%}
+    <path d="M20 12H5M11 6l-6 6 6 6"/>
+  {%- elif name == 'check' -%}
+    <path d="M4.5 12.5l5 5 10-11"/>
+  {%- elif name == 'star' -%}
+    <path d="M12 3.6l2.6 5.4 5.9.8-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.8l5.9-.8L12 3.6Z"/>
+  {%- elif name == 'truck' -%}
+    <path d="M2.5 7.5h11v9h-11zM13.5 11h4l3 3v2.5h-7z"/><circle cx="6.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/>
+  {%- elif name == 'refresh' -%}
+    <path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.5M20 12a8 8 0 0 1-13.7 5.6L4 15.5"/><path d="M20 4.5v4h-4M4 19.5v-4h4"/>
+  {%- elif name == 'shield' -%}
+    <path d="M12 3.5l7 2.6v5.4c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6.1l7-2.6Z"/><path d="M9 12l2.2 2.2L15.5 10"/>
+  {%- elif name == 'sparkle' -%}
+    <path d="M12 3.5l1.7 4.8 4.8 1.7-4.8 1.7L12 16.5l-1.7-4.8L5.5 10l4.8-1.7L12 3.5Z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/>
+  {%- elif name == 'menu' -%}
+    <path d="M4 7h16M4 12h16M4 17h16"/>
+  {%- elif name == 'mail' -%}
+    <rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="M4 7l8 6 8-6"/>
+  {%- elif name == 'phone' -%}
+    <path d="M6.5 3.5h3l1.5 4-2 1.5a11 11 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.5 5.7a2 2 0 0 1 2-2.2Z"/>
+  {%- elif name == 'pin' -%}
+    <path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.6"/>
+  {%- elif name == 'lock' -%}
+    <rect x="4.5" y="10.5" width="15" height="9.5" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/>
+  {%- elif name == 'instagram' -%}
+    <rect x="4" y="4" width="16" height="16" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><path d="M16.8 7.3h.01"/>
+  {%- elif name == 'grid' -%}
+    <rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/>
+  {%- elif name == 'leaf' -%}
+    <path d="M4 20c0-8 6-14 16-16 0 10-6 16-14 16H4Z"/><path d="M4 20C8 16 12 13 17 11"/>
+  {%- endif -%}
+</svg>
+{%- endmacro %}
+
+
+{% macro stars(value, small=false) -%}
+{%- set rating = (value or 0)|float -%}
+{%- set rounded = (rating * 2)|round(0, 'common') / 2 -%}
+<span class="stars{% if small %} stars-sm{% endif %}" role="img" aria-label="{{ '%.1f'|format(rating) }} out of 5">
+  {%- for i in range(1, 6) -%}
+    {%- set state = 'is-full' if rounded >= i else ('is-half' if rounded >= i - 0.5 else 'is-empty') -%}
+    <span class="star {{ state }}">{{ icon('star') }}</span>
+  {%- endfor -%}
+</span>
+{%- endmacro %}
+
+
+{% macro product_card(product) -%}
+{%- set variant = product.variants_list[0] if product.variants_list else '' -%}
+<article class="card">
+  <div class="card-media">
+    <a href="{{ url_for('product_detail', slug=product.slug) }}" aria-label="{{ product.name }}">
+      <img src="{{ url_for('static', filename='img/' ~ product.image) }}" alt="{{ product.name }}"
+           width="900" height="1125" loading="lazy" decoding="async">
+    </a>
+    <div class="card-flags">
+      {% if product.badge %}<span class="flag">{{ product.badge }}</span>{% endif %}
+      {% if product.compare_at and product.compare_at > product.price %}
+        <span class="flag flag-sale">Save {{ money(product.compare_at - product.price) }}</span>
+      {% endif %}
+    </div>
+    <form class="card-save" method="post" action="{{ url_for('wishlist_toggle') }}" data-wishlist-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="slug" value="{{ product.slug }}">
+      <input type="hidden" name="next" value="{{ request.full_path }}">
+      <button type="submit" class="save-btn{% if product.id in wishlist_ids %} is-saved{% endif %}"
+              aria-label="Save {{ product.name }} to wishlist" aria-pressed="{{ 'true' if product.id in wishlist_ids else 'false' }}">
+        {{ icon('heart') }}
+      </button>
+    </form>
+    <form class="card-quick" method="post" action="{{ url_for('cart_add') }}" data-cart-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+      <input type="hidden" name="variant" value="{{ variant }}">
+      <input type="hidden" name="quantity" value="1">
+      <input type="hidden" name="next" value="{{ url_for('cart') }}">
+      <button type="submit" class="quick-btn" {{ 'disabled' if product.stock <= 0 }}>
+        {{ icon('bag') }}<span>{{ 'Sold out' if product.stock <= 0 else 'Quick add' }}</span>
+      </button>
+    </form>
+  </div>
+
+  <div class="card-body">
+    <p class="eyebrow card-cat">{{ product.category_name }}</p>
+    <h3 class="card-title"><a href="{{ url_for('product_detail', slug=product.slug) }}">{{ product.name }}</a></h3>
+    <p class="card-line">{{ product.summary }}</p>
+    <div class="card-foot">
+      <p class="price">
+        <span>{{ money(product.price) }}</span>
+        {% if product.compare_at and product.compare_at > product.price %}<s>{{ money(product.compare_at) }}</s>{% endif %}
+      </p>
+      <p class="card-rating">
+        {{ stars(product.rating_avg, small=true) }}
+        <span>{{ '%.1f'|format(product.rating_avg) }}{% if product.review_count %} · {{ product.review_count }}{% endif %}</span>
+      </p>
+    </div>
+  </div>
+</article>
+{%- endmacro %}
+
+
+{% macro field(name, label, form, errors, type='text', placeholder='', autocomplete='', required=true, extra='') -%}
+<div class="field{% if errors.get(name) %} has-error{% endif %}">
+  <label for="{{ name }}">{{ label }}{% if not required %} <span class="optional">optional</span>{% endif %}</label>
+  <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ form.get(name, '') }}"
+         placeholder="{{ placeholder }}"{% if autocomplete %} autocomplete="{{ autocomplete }}"{% endif %}{% if errors.get(name) %} aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %}{% if extra %} {{ extra }}{% endif %}>
+  {% if errors.get(name) %}<p class="field-error" id="{{ name }}-error">{{ errors[name] }}</p>{% endif %}
+</div>
+{%- endmacro %}

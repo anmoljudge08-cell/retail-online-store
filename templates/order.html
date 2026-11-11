@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+
+{% block title %}Order {{ order.order_number }} — {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="order-hero">
+  <div class="wrap order-hero-inner">
+    <span class="order-check">{{ icon('check') }}</span>
+    <p class="eyebrow"><span class="rule"></span> Order confirmed</p>
+    <h1>Thank you, {{ order.full_name.split(' ')[0] }}.</h1>
+    <p class="order-lede">
+      Your order <strong>{{ order.order_number }}</strong> is with our atelier. A confirmation is on its way to
+      <strong>{{ order.email }}</strong>, and we will write again the moment it ships.
+    </p>
+    <div class="order-actions">
+      <a class="btn btn-dark" href="{{ url_for('shop') }}">Continue shopping</a>
+      <a class="btn btn-quiet" href="{{ url_for('track', order=order.order_number) }}">Track this order</a>
+    </div>
+  </div>
+</section>
+
+<div class="wrap order-layout">
+  <div class="order-main">
+    <!-- ---------------------------------------------------------- timeline -->
+    <section class="order-card">
+      <div class="order-card-head">
+        <h2>Progress</h2>
+        <span class="status-pill status-{{ order.status | lower }}">{{ order.status }}</span>
+      </div>
+      {% if order.status == 'Cancelled' %}
+        <p class="muted">This order was cancelled. Any payment is refunded within five working days.</p>
+      {% else %}
+      <ol class="timeline" data-current="{{ current_index }}">
+        {% for step in timeline %}
+        <li class="{% if loop.index0 < current_index %}is-done{% elif loop.index0 == current_index %}is-current{% endif %}">
+          <span class="timeline-dot">{{ icon('check') if loop.index0 <= current_index else '' }}</span>
+          <span class="timeline-label">{{ step }}</span>
+          {% if loop.index0 == current_index %}<span class="timeline-note">Current stage</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+      {% endif %}
+      <p class="muted order-placed">Placed {{ order.created_at | date_human }} at {{ order.created_at | date_human('%H:%M') }} · {{ delivery_label }}</p>
+    </section>
+
+    <!-- ------------------------------------------------------------- items -->
+    <section class="order-card">
+      <div class="order-card-head">
+        <h2>Your pieces</h2>
+        <span class="muted">{{ items | length }} line{{ '' if items | length == 1 else 's' }}</span>
+      </div>
+      <ul class="order-items">
+        {% for item in items %}
+        <li>
+          <a class="order-thumb" href="{{ url_for('product_detail', slug=item.slug) }}">
+            <img src="{{ url_for('static', filename='img/' ~ item.image) }}" alt="{{ item.name }}" width="900" height="1125" loading="lazy">
+          </a>
+          <div class="order-item-body">
+            <a class="order-item-name" href="{{ url_for('product_detail', slug=item.slug) }}">{{ item.name }}</a>
+            <span class="muted">{{ item.variant }} · Qty {{ item.quantity }}</span>
+          </div>
+          <span class="order-item-price">{{ money(item.unit_price * item.quantity) }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+
+      <dl class="summary-lines order-totals">
+        <div><dt>Subtotal</dt><dd>{{ money(order.subtotal) }}</dd></div>
+        {% if order.discount %}<div class="is-discount"><dt>Discount <span class="promo-tag">{{ order.promo_code }}</span></dt><dd>−{{ money(order.discount) }}</dd></div>{% endif %}
+        <div><dt>Delivery</dt><dd>{% if order.shipping %}{{ money(order.shipping) }}{% else %}<span class="is-free">Complimentary</span>{% endif %}</dd></div>
+        <div><dt>GST (18%)</dt><dd>{{ money(order.tax) }}</dd></div>
+        <div class="summary-total"><dt>Total paid</dt><dd>{{ money(order.total) }}</dd></div>
+      </dl>
+    </section>
+  </div>
+
+  <aside class="order-side">
+    <section class="order-card">
+      <h2>Delivered to</h2>
+      <address>
+        <strong>{{ order.full_name }}</strong><br>
+        {{ order.address_line }}<br>
+        {{ order.city }}{% if order.state %}, {{ order.state }}{% endif %} {{ order.postal_code }}<br>
+        {{ order.country }}<br>
+        <span class="muted">{{ order.phone }}</span>
+      </address>
+      {% if order.note %}<p class="muted order-note">“{{ order.note }}”</p>{% endif %}
+    </section>
+
+    <section class="order-card">
+      <h2>Payment</h2>
+      <p>{{ payment_label }}</p>
+      <p class="muted">Demo checkout — no funds were moved.</p>
+      <h3 class="order-subhead">Delivery</h3>
+      <p>{{ delivery_label }}</p>
+    </section>
+
+    <section class="order-card order-help">
+      <h2>Need a hand?</h2>
+      <p class="muted">Quote {{ order.order_number }} and a person will pick it up.</p>
+      <a class="link-arrow" href="mailto:{{ store.email }}">{{ icon('mail') }} {{ store.email }}</a>
+      <a class="link-arrow" href="tel:{{ store.phone | replace(' ', '') }}">{{ icon('phone') }} {{ store.phone }}</a>
+    </section>
+  </aside>
+</div>
+{% endblock %}

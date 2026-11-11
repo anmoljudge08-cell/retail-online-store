@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+
+{% block title %}Track an order — {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="{{ url_for('home') }}">House</a><span>/</span><span>Track order</span>
+    </nav>
+    <div class="page-head-row">
+      <div>
+        <h1>Where is my order?</h1>
+        <p class="page-head-sub">Enter the order number from your confirmation email, along with the email you used at checkout.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap track-layout">
+  <form class="track-form" method="post" action="{{ url_for('track') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="field">
+      <label for="order_number">Order number</label>
+      <input id="order_number" name="order_number" placeholder="AI-100241" value="{{ initial }}" required>
+      <p class="field-hint">Looks like AI-100241. It is on your confirmation email and in your account.</p>
+    </div>
+    <div class="field">
+      <label for="track-email">Email address</label>
+      <input id="track-email" type="email" name="email" placeholder="you@example.com" required>
+    </div>
+    <button class="btn btn-dark btn-block" type="submit">Find my order</button>
+    {% if error %}<p class="field-error track-error">{{ error }}</p>{% endif %}
+  </form>
+
+  <div class="track-result">
+    {% if lookup %}
+      <div class="order-card">
+        <div class="order-card-head">
+          <div>
+            <h2>{{ lookup.order_number }}</h2>
+            <p class="muted">Placed {{ lookup.created_at | date_human }} · {{ money(lookup.total) }}</p>
+          </div>
+          <span class="status-pill status-{{ lookup.status | lower }}">{{ lookup.status }}</span>
+        </div>
+
+        {% if lookup.status == 'Cancelled' %}
+          <p class="muted">This order was cancelled and any payment refunded.</p>
+        {% else %}
+        <ol class="timeline" data-current="{{ current_index }}">
+          {% for step in timeline %}
+          <li class="{% if loop.index0 < current_index %}is-done{% elif loop.index0 == current_index %}is-current{% endif %}">
+            <span class="timeline-dot">{{ icon('check') if loop.index0 <= current_index else '' }}</span>
+            <span class="timeline-label">{{ step }}</span>
+          </li>
+          {% endfor %}
+        </ol>
+        {% endif %}
+
+        <ul class="track-items">
+          {% for item in items %}
+          <li>
+            <img src="{{ url_for('static', filename='img/' ~ item.image) }}" alt="{{ item.name }}" width="900" height="1125" loading="lazy">
+            <span><strong>{{ item.name }}</strong><small>{{ item.variant }} · Qty {{ item.quantity }}</small></span>
+            <span>{{ money(item.unit_price * item.quantity) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <p class="muted">Delivering to {{ lookup.city }} {{ lookup.postal_code }} · {{ lookup.delivery_method | capitalize }} delivery</p>
+        <a class="link-arrow" href="{{ url_for('order_confirmation', order_number=lookup.order_number) }}">Full order details {{ icon('arrow-right') }}</a>
+      </div>
+    {% else %}
+      <div class="track-empty">
+        {{ icon('truck') }}
+        <h2>Tracking, the old-fashioned way</h2>
+        <p>Every order is packed by hand and shipped insured. Standard delivery takes three to five working days; express takes one to two.</p>
+        <ul class="track-faq">
+          <li><strong>No order number?</strong> It is in the subject line of your confirmation email, or under <a href="{{ url_for('account') }}">your account</a>.</li>
+          <li><strong>Guest checkout?</strong> Look for the email titled “Order confirmed”.</li>
+          <li><strong>Still stuck?</strong> Write to <a href="mailto:{{ store.email }}">{{ store.email }}</a> and quote your name and date of order.</li>
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
