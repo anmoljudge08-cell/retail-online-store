@@ -69,7 +69,7 @@
       <a class="collection{% if loop.first %} collection-wide{% endif %}" href="{{ url_for('shop', category=category.slug) }}">
         <img src="{{ url_for('static', filename='img/' ~ category.image) }}" alt="{{ category.name }}" loading="lazy" width="900" height="1125">
         <span class="collection-body">
-          <span class="collection-count">{{ '%02d'|format(category.count) }} pieces</span>
+          <span class="collection-count">{{ '%02d'|format(category.count) }} {{ 'piece' if category.count == 1 else 'pieces' }}</span>
           <span class="collection-name">{{ category.name }}</span>
           <span class="collection-blurb">{{ category.blurb }}</span>
         </span>
