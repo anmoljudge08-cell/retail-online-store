@@ -148,6 +148,31 @@ class PublicPagesTest(StoreTestCase):
         self.assertEqual(store.format_money(0), "\u20b90")
         self.assertEqual(store.format_money(-4500), "-\u20b94,500")
 
+    def test_static_assets_are_served(self):
+        css = self.client.get("/static/css/store.css")
+        self.assertEqual(css.status_code, 200)
+        self.assertIn("text/css", css.headers["Content-Type"])
+        self.assertIn(b"--ink", css.data)
+
+        js = self.client.get("/static/js/store.js")
+        self.assertEqual(js.status_code, 200)
+        self.assertIn("javascript", js.headers["Content-Type"])
+
+        image = self.client.get("/static/img/meridian-headphones.jpg")
+        self.assertEqual(image.status_code, 200)
+        self.assertIn("image/jpeg", image.headers["Content-Type"])
+
+    def test_asset_urls_are_versioned(self):
+        html = self.client.get("/").data.decode()
+        self.assertIn("/static/css/store.css?v=", html)
+        self.assertIn("/static/js/store.js?v=", html)
+
+    def test_health_reports_bundled_assets(self):
+        payload = self.client.get("/health").get_json()
+        self.assertEqual(payload["status"], "ok")
+        self.assertTrue(all(payload["assets"].values()), payload["assets"])
+        self.assertIn("asset_version", payload)
+
     def test_security_headers_are_present(self):
         response = self.client.get("/")
         self.assertEqual(response.headers["X-Content-Type-Options"], "nosniff")
