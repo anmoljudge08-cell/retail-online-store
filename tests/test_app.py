@@ -142,6 +142,12 @@ class PublicPagesTest(StoreTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["status"], "ok")
 
+    def test_footer_credits_the_builder(self):
+        for path in ("/", "/shop", "/login", "/product/solstice-automatic-watch"):
+            body = self.client.get(path).data.decode()
+            self.assertIn("Built by", body, path)
+            self.assertIn("Anmolpreet Singh.", body, path)
+
     def test_money_filter_uses_indian_grouping(self):
         self.assertEqual(store.format_money(124900), "\u20b91,24,900")
         self.assertEqual(store.format_money(999), "\u20b9999")
